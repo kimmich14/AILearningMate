@@ -1,5 +1,3 @@
----
-
 ## 📘 LearnMate
 
 **LearnMate** is an AI-powered personalized learning platform built with Django. It connects learners and tutors through adaptive course content, interactive lessons, discussions, and real-time performance tracking.
