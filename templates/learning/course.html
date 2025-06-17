@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load filters %}
+{% block content %}
+<section class="course-detail">
+    <div class="container">
+        <!-- Course Header -->
+        <div class="course-header">
+            <div class="course-image">
+                <img src="{{ course.course_image.url }}" alt="{{ course.title }}">
+            </div>
+            <div class="course-meta">
+                <h1>{{ course.title }}</h1>
+                <p class="instructor">By {{ course.instructor.get_full_name }}</p>
+                <div class="course-stats">
+                    <span class="difficulty">{{ course.difficulty }}</span>
+                    <span class="subject">{{ course.subject }}</span>
+                </div>
+                <div class="course-description">
+                    <h3>Description</h3>
+                    <p>{{ course.description }}</p>
+                </div>
+                <div class="learning-outcomes">
+                    <h3>What You'll Learn</h3>
+                    <p>{{ course.learning_outcomes }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons List -->
+        <div class="lessons-container">
+            <h2>Course Content</h2>
+            <div class="lessons-list">
+                {% for lesson in lessons %}
+                <div class="lesson-item">
+                    <div class="lesson-header" onclick="toggleLesson('lesson-{{ lesson.id }}')">
+                        <h3>{{ lesson.title }}</h3>
+                        <button class="toggle-btn" aria-expanded="false" aria-controls="lesson-{{ lesson.id }}">
+                            <svg class="arrow-icon" viewBox="0 0 24 24">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div id="lesson-{{ lesson.id }}" class="lesson-content" hidden>
+                        <!-- Lesson Content -->
+                        <div class="lesson-text">
+                            {{ lesson.content|linebreaks }}
+                        </div>
+
+                        <!-- Lesson Images -->
+                        {% if lesson.images.all %}
+                        <div class="lesson-media images">
+                            <h4>Images</h4>
+                            <div class="media-grid">
+                                {% for image in lesson.images.all %}
+                                <div class="media-item">
+                                    {% if image.image %}
+                                    <img src="{{ image.image.url }}" alt="{{ image.caption|default:'' }}">
+                                    {% else %}
+                                    <img src="{{ image.image_url }}" alt="{{ image.caption|default:'' }}">
+                                    {% endif %}
+                                    {% if image.caption %}
+                                    <p class="caption">{{ image.caption }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Lesson Videos -->
+                        {% if lesson.videos.all %}
+                        <div class="lesson-media videos">
+                            <h4>Videos</h4>
+                            <div class="media-grid">
+                                {% for video in lesson.videos.all %}
+                                <div class="media-item">
+                                    {% if video.video_file %}
+                                    <video controls>
+                                        <source src="{{ video.video_file.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    {% else %}
+                                    <div class="video-embed">
+                                        <iframe src="{{ video.video_url }}" frameborder="0" allowfullscreen></iframe>
+                                    </div>
+                                    {% endif %}
+                                    {% if video.title %}
+                                    <h5>{{ video.title }}</h5>
+                                    {% endif %}
+                                    {% if video.description %}
+                                    <p class="description">{{ video.description }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Quizzes Section (Toggleable) -->
+                        <div class="quiz-section">
+                            <div class="quiz-header" onclick="toggleQuiz('quiz-{{ lesson.id }}')">
+                                <h4>Quiz</h4>
+                                <button class="toggle-btn small" aria-expanded="false"
+                                    aria-controls="quiz-{{ lesson.id }}">
+                                    <svg class="arrow-icon" viewBox="0 0 24 24">
+                                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="quiz-{{ lesson.id }}" class="quiz-content" hidden>
+                                <!-- Quiz content would go here -->
+                                <p>Quiz questions and answers would appear here</p>
+                            </div>
+                        </div>
+
+                        <!-- Discussion Section (Toggleable) -->
+                        <div class="discussion-section">
+                            <div class="discussion-header" onclick="toggleDiscussion('discussion-{{ lesson.id }}')">
+                                <h4>Discussion</h4>
+                                <button class="toggle-btn small" aria-expanded="false"
+                                    aria-controls="discussion-{{ lesson.id }}">
+                                    <svg class="arrow-icon" viewBox="0 0 24 24">
+                                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="discussion-{{ lesson.id }}" class="discussion-content" hidden>
+                                <!-- Comment form -->
+                                <form class="comment-form" id="comment-{{ lesson.id }}">
+                                    <textarea placeholder="Add a comment..." required></textarea>
+                                    <button type="submit" class="btn primary">Post</button>
+                                </form>
+
+                                <!-- Comments list -->
+                                <div class="comments-list">
+                                    <!-- Sample comment -->
+                                    {% with lesson_discussions|get:lesson.id as lesson_comments %}
+                                    {% if lesson_comments %}
+                                    {% for comment in lesson_comments %}
+                                    <div class="comment" data-discussion="{{ comment.id }}">
+                                        <div class="comment-author">
+                                            {% if comment.user.profile.user_image %}
+                                            <img src="{{ comment.user.profile.user_image.url }}" alt="User Avatar" class="user-avatar">
+                                            {% else %}
+                                            <div class="user-avatar fallback-avatar">
+                                                {{ comment.user.username|first|upper }}
+                                            </div>
+                                            {% endif %}
+                                            <span>{{comment.user.username}}</span>
+                                        </div>
+                                        <div class="comment-text">
+                                            <p>{{comment.message}}</p>
+                                        </div>
+                                        <div class="comment-meta">
+                                            <span>{{comment.timestamp}}</span>
+                                            <button class="reply-btn">Reply</button>
+                                        </div>
+
+                                        <!-- Replies -->
+                                        <div class="replies" data-discussion="{{ comment.id }}">
+                                            <!-- Sample reply -->
+                                            {% for reply in comment.discussion_reply.all %}
+                                            <div class="comment reply">
+                                                <div class="comment-author">
+                                                    {% if reply.user.profile.user_image %}
+                                                    <img src="{{ reply.user.profile.user_image.url }}" alt="User Avatar" class="user-avatar">
+                                                    {% else %}
+                                                    <div class="user-avatar fallback-avatar">
+                                                        {{ reply.user.username|first|upper }}
+                                                    </div>
+                                                    {% endif %}
+                                                    <span>{{reply.user.username}}</span>
+                                                </div>
+                                                <div class="comment-text">
+                                                    <p>{{reply.message}}</p>
+                                                </div>
+                                                <div class="comment-meta">
+                                                    <span>{{reply.timestamp}}</span>
+                                                    <button class="reply-btn">Reply</button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                            <!-- 🔻 Hidden Reply Form -->
+                                            <form class="reply-form" id="reply-form-{{ comment.id }}" data-discussion="{{ comment.id }}" style="display: none;">
+                                                <textarea name="message" rows="3" placeholder="Write your reply..." required></textarea>
+                                                <button type="submit" class="btn small primary">Post Reply</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        }
+
+        .fallback-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ccc;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1rem;
+        text-transform: uppercase;
+        }
+</style>
+
+<script>
+    function toggleLesson(id) {
+        const content = document.getElementById(id);
+        const btn = content.previousElementSibling.querySelector('.toggle-btn');
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+        content.hidden = isExpanded;
+        btn.setAttribute('aria-expanded', !isExpanded);
+        btn.querySelector('.arrow-icon').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+
+    function toggleQuiz(id) {
+        const content = document.getElementById(id);
+        const btn = content.previousElementSibling.querySelector('.toggle-btn');
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+        content.hidden = isExpanded;
+        btn.setAttribute('aria-expanded', !isExpanded);
+        btn.querySelector('.arrow-icon').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+
+    function toggleDiscussion(id) {
+        const content = document.getElementById(id);
+        const btn = content.previousElementSibling.querySelector('.toggle-btn');
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+        content.hidden = isExpanded;
+        btn.setAttribute('aria-expanded', !isExpanded);
+        btn.querySelector('.arrow-icon').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".comment-form").on("submit", function (e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const lessonId = form.attr("id").split("-")[1];
+            const message = form.find("textarea").val();
+
+            $.ajax({
+                url: "{% url 'learningapp:submit_discussion' %}", // You will define this in urls.py
+                type: "POST",
+                data: {
+                    'lesson_id': lessonId,
+                    'message': message,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function (response) {
+                    alert("Comment posted!");
+                    form.find("textarea").val(""); // Clear textarea
+                },
+                error: function (xhr) {
+                    alert("Something went wrong: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $(".reply-btn").on("click", function () {
+            // Traverse up from the button to find the correct `.comment` block with `data-discussion`
+            const discussionId = $(this).closest('.comment[data-discussion]').data("discussion");
+
+            // Target the reply form with the matching ID
+            const form = $("#reply-form-" + discussionId);
+
+            // Hide other forms and toggle the selected one
+            $(".reply-form").not(form).hide();
+            form.toggle();
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $(".reply-form").on("submit", function (e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const discussionId = form.data("discussion");
+            const message = form.find("textarea").val();
+
+            $.ajax({
+                url: "{% url 'learningapp:submit_reply' %}",
+                method: "POST",
+                data: {
+                    'discussion_id': discussionId,
+                    'message': message,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    alert("Reply posted!");
+                    form.find("textarea").val(""); // Clear textarea
+                    form.hide(); // Optionally hide form again
+                    // Optionally: append reply to DOM dynamically
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+    
+  
+{% endblock %}

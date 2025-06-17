@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI LearnMate - Revolutionizing Learning with AI</title>
+    <link rel="stylesheet" href="{% static 'styles/home.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/courses.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/course.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/progress.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/assessments.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/about_us.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/support.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/messages.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/sign_up.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/dashboard.css' %}" />
+    {% block extra_css %}{% endblock %}
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Include this in your head for the close button -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="container">
+        <div class="logo">
+          <h1>AI LearnMate</h1>
+        </div>
+        <nav>
+          <ul>
+            <li><a href="{% url 'learningapp:home' %}">Home</a></li>
+            <li><a href="{% url 'learningapp:courses' %}">Courses</a></li>
+            <li><a href="{% url 'usersapp:role_redirect' %}">Dashboard</a></li>
+            <li><a href="{% url 'learningapp:about_us' %}">About Us</a></li>
+            <li><a href="{% url 'learningapp:support' %}">Support</a></li>
+          </ul>
+        </nav>
+        <div class="auth-buttons">
+          {% if user.is_authenticated %}
+          <a href="{% url 'usersapp:profile' %}" class="btn">Profile</a>
+          <a href="{% url 'usersapp:logout' %}" class="btn danger">Log Out</a>
+          {% else %}
+          <a href="{% url 'usersapp:login' %}" class="btn">Login</a>
+          <a href="{% url 'usersapp:signup' %}" class="btn primary">Sign Up</a>
+          {% endif %}
+        </div>        
+      </div>
+    </header>
+
+    <!-- Messages Container -->
+    <div class="messages-container">
+      {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% block content %} {% endblock %}
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>AI LearnMate</h3>
+            <p>
+              Revolutionizing education with AI-powered personalized learning.
+            </p>
+          </div>
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="#">Courses</a></li>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Follow Us</h4>
+            <ul>
+              <li><a href="#">Facebook</a></li>
+              <li><a href="#">Twitter</a></li>
+              <li><a href="#">LinkedIn</a></li>
+              <li><a href="#">Instagram</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Contact Us</h4>
+            <p>Email: support@ailearnmate.com</p>
+            <p>Phone: +254 799 549-992</p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 AI LearnMate. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Add this right before the closing </body> tag in your base.html -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Close button functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const closeButtons = document.querySelectorAll(".close");
+
+        closeButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            this.parentElement.style.opacity = "0";
+            setTimeout(() => {
+              this.parentElement.remove();
+            }, 300);
+          });
+        });
+
+        // Auto-dismiss after 5 seconds
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.style.opacity = "0";
+            setTimeout(() => {
+              alert.remove();
+            }, 300);
+          }, 5000);
+        });
+      });
+    </script>
+  </body>
+</html>

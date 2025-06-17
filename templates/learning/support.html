@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="help-support">
+    <div class="container">
+        <h1 class="page-title">Help & Support</h1>
+        <p class="page-subtitle">Find answers to common questions or get in touch with our support team</p>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ('faq1')">
+                        <span>How do I reset my password?</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </div>
+                    <div id="faq1" class="faq-answer" hidden>
+                        <p>To reset your password, go to the login page and click on "Forgot Password". Enter your email
+                            address and we'll send you a link to create a new password. The link will expire in 24 hours
+                            for security reasons.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ('faq2')">
+                        <span>Why can't I access my course materials?</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </div>
+                    <div id="faq2" class="faq-answer" hidden>
+                        <p>This could happen for several reasons:</p>
+                        <ul>
+                            <li>Your subscription may have expired</li>
+                            <li>There might be a temporary system issue</li>
+                            <li>Your browser cache needs to be cleared</li>
+                        </ul>
+                        <p>Try refreshing the page or logging out and back in. If the problem persists, contact our
+                            support team.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ('faq3')">
+                        <span>How does the AI personalization work?</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </div>
+                    <div id="faq3" class="faq-answer" hidden>
+                        <p>Our AI analyzes your learning patterns, quiz results, and engagement metrics to:</p>
+                        <ul>
+                            <li>Adjust the difficulty of materials</li>
+                            <li>Recommend relevant content</li>
+                            <li>Identify your strengths and weaknesses</li>
+                            <li>Personalize your learning path</li>
+                        </ul>
+                        <p>The more you use the platform, the better it adapts to your needs.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ('faq4')">
+                        <span>Can I download course materials for offline use?</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </div>
+                    <div id="faq4" class="faq-answer" hidden>
+                        <p>Yes! Most course materials can be downloaded for offline use. Look for the download icon (↓)
+                            next to each lesson. Note that some interactive content requires an internet connection.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ('faq5')">
+                        <span>How do I contact my instructor?</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </div>
+                    <div id="faq5" class="faq-answer" hidden>
+                        <p>You can contact instructors through:</p>
+                        <ol>
+                            <li>The course discussion forum</li>
+                            <li>Direct messaging in your dashboard</li>
+                            <li>Scheduled office hours (see course details)</li>
+                        </ol>
+                        <p>Most instructors respond within 24-48 hours.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Options -->
+        <div class="support-section">
+            <h2>Need More Help?</h2>
+            <div class="support-options">
+                <!-- Live Chat -->
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Live Chat</h3>
+                    <p>Get instant help from our support team during business hours (9AM-6PM EST).</p>
+                    <button class="btn primary">Start Chat</button>
+                </div>
+
+                <!-- Support Ticket -->
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h3>Support Ticket</h3>
+                    <p>Submit a detailed request and we'll get back to you within 24 hours.</p>
+                    <button class="btn primary">Create Ticket</button>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Emergency Contact</h3>
+                    <p>For urgent technical issues preventing course access, call our 24/7 helpline.</p>
+                    <button class="btn primary">+254 799 549 992</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorials Section -->
+        <div class="tutorials-section">
+            <h2>Guides & Tutorials</h2>
+            <div class="tutorials-grid">
+                <!-- Tutorial 1 -->
+                <div class="tutorial-card">
+                    <div class="tutorial-thumbnail">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeqvXMD9sKakPE7E3nEgCLNWnm-DsmBfpCgQ&s" alt="Getting Started Tutorial">
+                        <!-- Image Description: Screenshot of dashboard with annotations -->
+                        <div class="play-icon"><i class="fas fa-play"></i></div>
+                    </div>
+                    <div class="tutorial-info">
+                        <h3>Getting Started with AI LearnMate</h3>
+                        <p class="duration"><i class="far fa-clock"></i> 5 min</p>
+                        <p>A quick tour of the platform's key features and how to navigate your dashboard.</p>
+                    </div>
+                </div>
+
+                <!-- Tutorial 2 -->
+                <div class="tutorial-card">
+                    <div class="tutorial-thumbnail">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeqvXMD9sKakPE7E3nEgCLNWnm-DsmBfpCgQ&s" alt="Personalization Guide">
+                        <!-- Image Description: Graph showing personalized learning path -->
+                        <div class="play-icon"><i class="fas fa-play"></i></div>
+                    </div>
+                    <div class="tutorial-info">
+                        <h3>Maximizing Personalization</h3>
+                        <p class="duration"><i class="far fa-clock"></i> 8 min</p>
+                        <p>Learn how to get the most out of our AI-powered adaptive learning system.</p>
+                    </div>
+                </div>
+
+                <!-- Tutorial 3 -->
+                <div class="tutorial-card">
+                    <div class="tutorial-thumbnail">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeqvXMD9sKakPE7E3nEgCLNWnm-DsmBfpCgQ&s" alt="Troubleshooting Guide">
+                        <!-- Image Description: Common error screens with solutions -->
+                        <div class="play-icon"><i class="fas fa-book"></i></div>
+                    </div>
+                    <div class="tutorial-info">
+                        <h3>Troubleshooting Common Issues</h3>
+                        <p class="duration"><i class="far fa-clock"></i> PDF Guide</p>
+                        <p>Step-by-step solutions for the most frequent technical problems.</p>
+                    </div>
+                </div>
+
+                <!-- Tutorial 4 -->
+                <div class="tutorial-card">
+                    <div class="tutorial-thumbnail">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeqvXMD9sKakPE7E3nEgCLNWnm-DsmBfpCgQ&s" alt="Mobile App Guide">
+                        <!-- Image Description: Mobile app screenshots -->
+                        <div class="play-icon"><i class="fas fa-mobile-alt"></i></div>
+                    </div>
+                    <div class="tutorial-info">
+                        <h3>Mobile App Walkthrough</h3>
+                        <p class="duration"><i class="far fa-clock"></i> 6 min</p>
+                        <p>How to use all features of our iOS and Android applications.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleFAQ(id) {
+        const answer = document.getElementById(id);
+        const isHidden = answer.hidden;
+        answer.hidden = !isHidden;
+
+        // Rotate arrow icon
+        const arrow = answer.previousElementSibling.querySelector('.arrow-icon');
+        arrow.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
+    }
+</script>
+{% endblock %}

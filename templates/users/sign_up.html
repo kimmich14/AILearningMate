@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="signup-section">
+    <div class="container">
+        <div class="signup-card">
+            <h1 class="signup-title">Create Your Account</h1>
+            <p class="signup-subtitle">Join AI LearnMate as either a learner or instructor</p>
+
+            <form id="signupForm" method="POST" class="signup-form">
+                {% csrf_token %}
+
+                <!-- Account Type Selection -->
+                <div class="form-group account-type-group">
+                    <label>I want to join as:</label>
+                    <div class="account-type-options">
+                        <label class="account-type-option">
+                            <input type="radio" name="account_type" value="learner" checked>
+                            <div class="option-card">
+                                <i class="fas fa-user-graduate"></i>
+                                <span>Learner</span>
+                            </div>
+                        </label>
+                        <label class="account-type-option">
+                            <input type="radio" name="account_type" value="instructor">
+                            <div class="option-card">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                <span>Instructor</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Form Fields -->
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                    <small class="error-message" id="email-error"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                    <small class="error-message" id="username-error"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <small class="error-message" id="password-error"></small>
+                </div>
+
+                <button type="submit" class="btn primary-btn">Create Account</button>
+
+                <p class="login-link">Already have an account? <a href="{% url 'usersapp:login' %}">Log in</a></p>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('signupForm');
+        const emailInput = document.getElementById('email');
+        const usernameInput = document.getElementById('username');
+
+        // Real-time validation
+        emailInput.addEventListener('blur', validateEmail);
+        usernameInput.addEventListener('blur', validateUsername);
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Validate all fields
+            const isEmailValid = validateEmail();
+            const isUsernameValid = validateUsername();
+            const isPasswordValid = document.getElementById('password').value.length >= 8;
+
+            if (!isPasswordValid) {
+                document.getElementById('password-error').textContent = 'Password must be at least 8 characters';
+            } else {
+                document.getElementById('password-error').textContent = '';
+            }
+
+            if (isEmailValid && isUsernameValid && isPasswordValid) {
+                // Submit form if all validations pass
+                form.submit();
+            }
+        });
+
+        function validateEmail() {
+            const email = emailInput.value.trim();
+            const errorElement = document.getElementById('email-error');
+
+            if (!email) {
+                errorElement.textContent = 'Email is required';
+                return false;
+            }
+
+            // Basic email validation
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errorElement.textContent = 'Please enter a valid email';
+                return false;
+            }
+
+            // AJAX validation
+            fetch("{% url 'usersapp:signup' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ email: email, username: '' })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.errors && data.errors.email) {
+                        errorElement.textContent = data.errors.email;
+                        return false;
+                    } else {
+                        errorElement.textContent = '';
+                        return true;
+                    }
+                });
+
+            return true;
+        }
+
+        function validateUsername() {
+            const username = usernameInput.value.trim();
+            const errorElement = document.getElementById('username-error');
+
+            if (!username) {
+                errorElement.textContent = 'Username is required';
+                return false;
+            }
+
+            if (username.length < 4) {
+                errorElement.textContent = 'Username must be at least 4 characters';
+                return false;
+            }
+
+            // AJAX validation
+            fetch('/signup/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ email: '', username: username })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.errors && data.errors.username) {
+                        errorElement.textContent = data.errors.username;
+                        return false;
+                    } else {
+                        errorElement.textContent = '';
+                        return true;
+                    }
+                });
+
+            return true;
+        }
+    });
+</script>
+{% endblock %}

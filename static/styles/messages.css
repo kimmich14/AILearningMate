@@ -1,0 +1,86 @@
+/* Messages/Alerts Styles */
+.messages-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+    width: 100%;
+}
+
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    opacity: 1;
+}
+
+.alert-success {
+    background-color: #28a745;
+    border-left: 5px solid #218838;
+}
+
+.alert-info {
+    background-color: #17a2b8;
+    border-left: 5px solid #138496;
+}
+
+.alert-warning {
+    background-color: #ffc107;
+    border-left: 5px solid #e0a800;
+    color: #212529;
+}
+
+.alert-error {
+    background-color: #dc3545;
+    border-left: 5px solid #c82333;
+}
+
+.close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    margin-left: 15px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 0;
+}
+
+.close:hover {
+    opacity: 1;
+}
+
+/* Animation for alert appearance */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.alert {
+    animation: slideIn 0.3s ease forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .messages-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}

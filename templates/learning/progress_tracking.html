@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="progress-tracking">
+    <div class="container">
+        <h1 class="page-title">Your Learning Progress</h1>
+
+        <div class="progress-summary">
+            <div class="summary-card">
+                <h3>Courses in Progress</h3>
+                <p class="big-number">{{ progress_data.count }}</p>
+            </div>
+            <div class="summary-card">
+                <h3>Average Completion</h3>
+                <p class="big-number">
+                    {{ progress_data.avg_completion|default:"0"|floatformat }}%
+                </p>
+            </div>
+            <div class="summary-card">
+                <h3>Last Active</h3>
+                <p class="big-number">
+                    {{ progress_data.0.last_accessed|date:"M d"|default:"-" }}
+                </p>
+            </div>
+        </div>
+
+        <div class="courses-progress">
+            {% for progress in progress_data %}
+            <div class="course-progress-item">
+                <div class="course-header" onclick="toggleProgress('progress-{{ progress.course.id }}')">
+                    <div class="course-info">
+                        <h3>{{ progress.course.title }}</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ progress.completion_percentage }}%"></div>
+                            <span>{{ progress.completion_percentage|floatformat }}% Complete</span>
+                        </div>
+                    </div>
+                    <button class="toggle-btn" aria-expanded="false" aria-controls="progress-{{ progress.course.id }}">
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="progress-{{ progress.course.id }}" class="progress-details" hidden>
+                    <div class="details-grid">
+                        <div class="performance-section">
+                            <h4>Performance Overview</h4>
+                            <div class="chart-container">
+                                <!-- Placeholder for chart - you would integrate with Chart.js or similar -->
+                                <div class="chart-placeholder">
+                                    <p>Completion Progress Over Time</p>
+                                    <div class="mock-chart">
+                                        <div class="chart-bar" style="height: 30%"></div>
+                                        <div class="chart-bar" style="height: 50%"></div>
+                                        <div class="chart-bar" style="height: 70%"></div>
+                                        <div class="chart-bar" style="height: {{ progress.completion_percentage }}%">
+                                        </div>
+                                    </div>
+                                    <div class="chart-labels">
+                                        <span>Week 1</span>
+                                        <span>Week 2</span>
+                                        <span>Week 3</span>
+                                        <span>Current</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-section">
+                            <div class="strengths-weaknesses">
+                                <div class="strengths">
+                                    <h4>Your Strengths</h4>
+                                    {% if progress.strengths %}
+                                    <ul>
+                                        {% for strength in progress.strengths.splitlines %}
+                                        <li>{{ strength }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <p class="empty-message">No strengths identified yet</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="weaknesses">
+                                    <h4>Areas for Improvement</h4>
+                                    {% if progress.weaknesses %}
+                                    <ul>
+                                        {% for weakness in progress.weaknesses.splitlines %}
+                                        <li>{{ weakness }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <p class="empty-message">No weaknesses identified yet</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="ai-suggestions">
+                                <h4>AI Recommendations</h4>
+                                <div class="suggestion-card">
+                                    <p>Based on your progress, we recommend focusing on:</p>
+                                    <ul>
+                                        <li>Reviewing lesson 3: {{ progress.course.lesson_course.all.2.title }}</li>
+                                        <li>Completing the practice exercises</li>
+                                        <li>Joining the discussion forum for clarification</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="engagement-section">
+                        <h4>Engagement Metrics</h4>
+                        <div class="engagement-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Time Spent</span>
+                                <span class="metric-value">5h 42m</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Last Active</span>
+                                <span class="metric-value">{{ progress.last_accessed|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Learning Style</span>
+                                <span class="metric-value">Visual + Reading</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <p>You don't have any progress data yet. Enroll in a course to get started!</p>
+                <a href="{% url 'learningapp:courses' %}" class="btn primary">Browse Courses</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleProgress(id) {
+        const content = document.getElementById(id);
+        const btn = content.previousElementSibling.querySelector('.toggle-btn');
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+        content.hidden = isExpanded;
+        btn.setAttribute('aria-expanded', !isExpanded);
+        btn.querySelector('.arrow-icon').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+</script>
+{% endblock %}

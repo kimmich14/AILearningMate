@@ -1,0 +1,91 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@300;400&display=swap');
+
+/* Section Container */
+.courses {
+    width: 90%;
+    max-width: 1200px;
+    margin: 50px auto;
+}
+
+/* Page Title */
+.page-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 40px;
+    color: #222;
+}
+
+/* Courses Grid */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Course Card */
+.course-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Course Image (Background) */
+.course-image {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s ease-in-out;
+}
+
+/* Hover Effect (Zoom Background) */
+.course-card:hover .course-image {
+    background-size: 110%;
+}
+
+/* Course Info */
+.course-info {
+    padding: 15px;
+    background: #eef1f7;
+    text-align: center;
+}
+
+/* Course Title */
+.course-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.course-title:hover {
+    text-decoration: underline;
+}
+
+/* Course Summary */
+.course-summary {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .courses-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .courses-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

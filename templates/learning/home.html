@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h2>Revolutionizing Learning with AI-Powered Personalization!</h2>
+            <p>Experience adaptive learning, AI-driven recommendations, and progress tracking tailored just for you.
+            </p>
+            <a href="#" class="btn primary">Get Started</a>
+        </div>
+        <!-- Add a hero image here -->
+        <div class="hero-image">
+            <img src="{% static 'images/headline.jpeg' %}" alt="AI Learning Illustration" style="height: 375px;">
+            <!-- Image Description: A modern illustration of a student using AI tools for learning. Suitable size: 800x600 -->
+        </div>
+    </div>
+</section>
+
+<!-- Overview Section -->
+<section class="overview">
+    <div class="container">
+        <h2>How AI LearnMate Works</h2>
+        <div class="features">
+            <div class="feature">
+                <h3>Adaptive Learning</h3>
+                <p>Our AI adapts to your learning style and pace, ensuring you get the most out of every lesson.</p>
+            </div>
+            <div class="feature">
+                <h3>AI-Driven Recommendations</h3>
+                <p>Get personalized course recommendations based on your interests and progress.</p>
+            </div>
+            <div class="feature">
+                <h3>Progress Tracking</h3>
+                <p>Track your learning journey with detailed analytics and insights.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials">
+    <div class="container">
+        <h2>What Our Users Say</h2>
+        <div class="testimonial-cards">
+            <div class="card">
+                <p>"AI LearnMate has transformed the way I learn. The personalized recommendations are spot on!"</p>
+                <span>- John Doe</span>
+            </div>
+            <div class="card">
+                <p>"The adaptive quizzes are fantastic. I feel like the platform really understands my needs."</p>
+                <span>- Jane Smith</span>
+            </div>
+            <div class="card">
+                <p>"As an instructor, I love the analytics dashboard. It helps me tailor my courses better."</p>
+                <span>- Sarah Johnson</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

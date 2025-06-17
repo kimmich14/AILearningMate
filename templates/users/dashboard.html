@@ -1,0 +1,217 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<section class="learner-dashboard">
+  <div class="dashboard-container">
+    <!-- Main Grid Layout -->
+    <div class="dashboard-grid">
+      <!-- Profile Summary Card -->
+      <div class="dashboard-card profile-summary">
+        <div class="profile-header">
+          <div class="profile-image">
+            {% if profile.user_image %}
+            <img src="{{ profile.user_image.url }}" alt="Profile Image" />
+            {% else %}
+            <span class="initials">{{ user.username|first|upper }}</span>
+            {% endif %}
+          </div>
+          <div class="profile-info">
+            <h2>{{ profile.full_name|default:user.username }}</h2>
+            <p class="learning-level">
+              {{ profile.learning_level|default:"Beginner" }} Learner
+            </p>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              style="width: {{ profile.progress_percentage|default:0 }}%"
+            ></div>
+          </div>
+          <span class="progress-text"
+            >{{ profile.progress_percentage|default:0 }}% Overall Progress</span
+          >
+        </div>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ enrolled_courses.count }}</span>
+            <span class="stat-label">Courses</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">12</span>
+            <!-- Dummy value -->
+            <span class="stat-label">Hours Learned</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">85%</span>
+            <!-- Dummy value -->
+            <span class="stat-label">Avg. Score</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Learning Recommendations -->
+      <div class="dashboard-card recommendations">
+        <div class="card-header">
+          <h3>Your Learning Path</h3>
+          <p>AI-powered recommendations</p>
+        </div>
+        <div class="recommendations-list">
+          {% for item in learning_recommendations %}
+          <div class="recommendation-item priority-{{ item.priority }}">
+            <div class="recommendation-icon">
+              {% if item.type == "course" %}
+              <i class="fas fa-book"></i>
+              {% elif item.type == "quiz" %}
+              <i class="fas fa-question-circle"></i>
+              {% else %}
+              <i class="fas fa-redo"></i>
+              {% endif %}
+            </div>
+            <div class="recommendation-content">
+              <h4>{{ item.title }}</h4>
+              <span class="priority-badge">{{ item.priority|title }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Upcoming Tasks -->
+      <div class="dashboard-card tasks">
+        <div class="card-header">
+          <h3>Upcoming Tasks</h3>
+          <p>Your study plan</p>
+        </div>
+        <div class="tasks-list">
+          {% for task in upcoming_tasks %}
+          <div class="task-item">
+            <div class="task-checkbox">
+              <input type="checkbox" id="task-{{ forloop.counter }}" />
+              <label for="task-{{ forloop.counter }}"></label>
+            </div>
+            <div class="task-content">
+              <h4>{{ task.title }}</h4>
+              <p class="task-meta">{{ task.course }} • Due {{ task.due }}</p>
+            </div>
+            <div class="task-actions">
+              <button class="task-btn">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Performance Insights -->
+      <div class="dashboard-card performance">
+        <div class="card-header">
+          <h3>Performance Insights</h3>
+          <p>Your strengths and areas to improve</p>
+        </div>
+        <div class="performance-content">
+          <div class="strengths">
+            <h4>Strengths</h4>
+            <ul>
+              {% for strength in performance_data.strengths %}
+              <li>{{ strength }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="weaknesses">
+            <h4>Areas to Improve</h4>
+            <ul>
+              {% for weakness in performance_data.weaknesses %}
+              <li>{{ weakness }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="progress-chart">
+          <h4>Course Progress</h4>
+          <canvas id="progressChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Activities -->
+      <div class="dashboard-card activities">
+        <div class="card-header">
+          <h3>Recent Activities</h3>
+          <p>Your learning history</p>
+        </div>
+        <div class="activities-list">
+          {% for activity in recent_activities %}
+          <div class="activity-item">
+            <div class="activity-icon">
+              {% if activity.type == "lesson" %}
+              <i class="fas fa-play-circle"></i>
+              {% elif activity.type == "quiz" %}
+              <i class="fas fa-poll"></i>
+              {% else %}
+              <i class="fas fa-book-open"></i>
+              {% endif %}
+            </div>
+            <div class="activity-content">
+              <h4>{{ activity.title }}</h4>
+              <p class="activity-meta">
+                {% if activity.type == "quiz" %} Scored {{ activity.score }} •
+                {% endif %} {{ activity.time }} • {{ activity.course }}
+              </p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include Chart.js if needed -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // You can add JavaScript for interactive elements here
+  document.addEventListener("DOMContentLoaded", function () {
+    // Example: Task completion toggle
+    const checkboxes = document.querySelectorAll(".task-checkbox input");
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", function () {
+        const taskItem = this.closest(".task-item");
+        if (this.checked) {
+          taskItem.classList.add("completed");
+        } else {
+          taskItem.classList.remove("completed");
+        }
+      });
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const bars = document.querySelectorAll(".chart-bar");
+    bars.forEach((bar) => {
+      // Reset height to 0 for animation
+      bar.style.height = "0%";
+      // Trigger reflow
+      void bar.offsetWidth;
+      // Set to actual height
+      bar.style.height = bar.dataset.height || bar.style.height;
+    });
+  });
+</script>
+<script>
+  const ctx = document.getElementById('progressChart').getContext('2d');
+  new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: [{% for course in performance_data.progress.keys %}"{{ course }}",{% endfor %}],
+          datasets: [{
+              label: 'Progress',
+              data: [{% for progress in performance_data.progress.values %}{{ progress }},{% endfor %}],
+              backgroundColor: '#4e73df'
+          }]
+      },
+      options: { scales: { y: { max: 100 } } }
+  });
+</script>
+{% endblock %}

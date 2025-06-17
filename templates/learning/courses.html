@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- Courses Section -->
+<section class="courses">
+    <h2 class="page-title">Explore Our Courses</h2>
+
+    <div class="courses-grid">
+    {% for course in courses %}
+        <div class="course-card">
+            <div class="course-image" style="background-image: url('{{ course.course_image.url }}');"></div>
+            <div class="course-info">
+                <h4><a href="{% url 'learningapp:course_detail' course.id %}" class="course-title"> {{course.title}} </a></h4>
+                <p class="course-summary">{{course.description}}</p>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</section>
+{% endblock %}

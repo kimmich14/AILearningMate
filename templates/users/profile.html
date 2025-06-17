@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-card">
+            <h1 class="profile-title">Complete Your Profile</h1>
+            <p class="profile-subtitle">Help us personalize your learning experience</p>
+
+            <form id="profileForm" method="POST" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+
+                <!-- Profile Picture -->
+                <div class="form-group profile-picture-group">
+                    <div class="profile-picture-container">
+                        <div class="profile-picture-preview" id="profilePicturePreview">
+                            {% if profile and profile.user_image %}
+                            <img src="{{ profile.user_image.url }}" alt="Profile Picture">
+                            {% else %}
+                            <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </div>
+                        <label for="user_image" class="upload-btn">
+                            <i class="fas fa-camera"></i> Upload Photo
+                        </label>
+                        <input type="file" id="user_image" name="user_image" accept="image/*">
+                    </div>
+                </div>
+
+                <!-- Form Fields -->
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name"
+                        value="{% if profile %}{{ profile.full_name }}{% endif %}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number"
+                        value="{% if profile %}{{ profile.phone_number }}{% endif %}">
+                </div>
+
+                <div class="form-group">
+                    <label for="learning_level">Learning Level</label>
+                    <select id="learning_level" name="learning_level" required>
+                        <option value="">Select your level</option>
+                        {% for level in learning_levels %}
+                        <option value="{{ level }}" {% if profile and profile.learning_level == level %}selected{% endif %}>
+                            {{ level }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="about">About You</label>
+                    <textarea id="about" name="about" rows="4">{% if profile %}{{ profile.about }}{% endif %}</textarea>
+                </div>
+
+                <button type="submit" class="btn primary-btn">Save Profile</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('profileForm');
+        const profilePictureInput = document.getElementById('user_image');
+        const profilePicturePreview = document.getElementById('profilePicturePreview');
+
+        // Preview profile picture when selected
+        profilePictureInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    profilePicturePreview.innerHTML = `<img src="${e.target.result}" alt="Profile Preview">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submission with AJAX
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+
+            fetch("{% url 'usersapp:profile' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>
+{% endblock %}

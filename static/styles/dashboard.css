@@ -1,0 +1,478 @@
+/* Learner Dashboard Styles */
+.learner-dashboard {
+    padding: 2rem;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Summary Card */
+.profile-summary {
+    grid-column: span 3;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #3498db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-right: 1rem;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-image .initials {
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.profile-info h2 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.4rem;
+}
+
+.learning-level {
+    color: #7f8c8d;
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+}
+
+.progress-container {
+    margin: 1.5rem 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #3498db;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+/* Learning Recommendations */
+.recommendations {
+    grid-column: span 3;
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+}
+
+.card-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.card-header p {
+    margin: 0.2rem 0 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border-radius: 8px;
+    background-color: #f8fafc;
+}
+
+.recommendation-item.priority-high {
+    border-left: 4px solid #e74c3c;
+}
+
+.recommendation-item.priority-medium {
+    border-left: 4px solid #f39c12;
+}
+
+.recommendation-item.priority-low {
+    border-left: 4px solid #2ecc71;
+}
+
+.recommendation-icon {
+    width: 36px;
+    height: 36px;
+    background-color: #e3f2fd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.8rem;
+    color: #3498db;
+}
+
+.recommendation-content {
+    flex: 1;
+}
+
+.recommendation-content h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #2c3e50;
+}
+
+.priority-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.recommendation-item.priority-high .priority-badge {
+    background-color: #fdecea;
+    color: #e74c3c;
+}
+
+.recommendation-item.priority-medium .priority-badge {
+    background-color: #fef5e6;
+    color: #f39c12;
+}
+
+.recommendation-item.priority-low .priority-badge {
+    background-color: #e8f8f0;
+    color: #2ecc71;
+}
+
+/* Upcoming Tasks */
+.tasks {
+    grid-column: span 3;
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+.task-item.completed {
+    opacity: 0.6;
+}
+
+.task-item.completed .task-content h4 {
+    text-decoration: line-through;
+}
+
+.task-checkbox {
+    margin-right: 0.8rem;
+}
+
+.task-checkbox input {
+    display: none;
+}
+
+.task-checkbox label {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 4px;
+    display: block;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.task-checkbox input:checked+label {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+.task-checkbox input:checked+label::after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-content h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #2c3e50;
+}
+
+.task-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+.task-actions {
+    margin-left: 0.8rem;
+}
+
+.task-btn {
+    background: none;
+    border: none;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 0.2rem;
+}
+
+/* Performance Insights */
+.performance {
+    grid-column: span 6;
+}
+
+.performance-content {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.strengths,
+.weaknesses {
+    flex: 1;
+}
+
+.strengths h4,
+.weaknesses h4 {
+    color: #2c3e50;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+}
+
+.strengths ul,
+.weaknesses ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.strengths li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e8f8f0;
+    color: #2ecc71;
+}
+
+.weaknesses li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #fdecea;
+    color: #e74c3c;
+}
+
+.progress-chart {
+    margin-top: 1.5rem;
+}
+
+.progress-chart h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.chart-container {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    height: 200px;
+}
+
+.chart-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-bar {
+    width: 40px;
+    background-color: #3498db;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: height 0.5s ease;
+}
+
+.chart-value {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: #2c3e50;
+}
+
+.chart-label {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    text-align: center;
+}
+
+/* Recent Activities */
+.activities {
+    grid-column: span 6;
+}
+
+.activities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border-radius: 8px;
+    background-color: #f8fafc;
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    background-color: #e3f2fd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.8rem;
+    color: #3498db;
+}
+
+.activity-content h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #2c3e50;
+}
+
+.activity-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .profile-summary,
+    .recommendations,
+    .tasks {
+        grid-column: span 3;
+    }
+
+    .performance,
+    .activities {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-summary,
+    .recommendations,
+    .tasks,
+    .performance,
+    .activities {
+        grid-column: span 1;
+    }
+
+    .performance-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

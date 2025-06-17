@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="adaptive-quizzes">
+    <div class="container">
+        <h1 class="page-title">Your Quiz Results</h1>
+        <p class="page-subtitle">Review your performance and see how you compare to others</p>
+
+        {% if user_results %}
+        <div class="quiz-results-list">
+            {% for result in user_results %}
+            <div class="quiz-result-card">
+                <div class="quiz-header" onclick="toggleQuizDetails('quiz-{{ result.id }}')">
+                    <div class="quiz-title">
+                        <h3>{{ result.quiz.title }}</h3>
+                        <span class="difficulty-badge {{ result.quiz.difficulty|lower }}">
+                            {{ result.quiz.difficulty }}
+                        </span>
+                        <span
+                            class="score-badge {% if result.score >= result.quiz.passing_score %}passed{% else %}failed{% endif %}">
+                            Score: {{ result.score }}%
+                        </span>
+                    </div>
+                    <button class="toggle-btn" aria-expanded="false" aria-controls="quiz-{{ result.id }}">
+                        <svg class="arrow-icon" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="quiz-{{ result.id }}" class="quiz-details" hidden>
+                    <div class="details-grid">
+                        <!-- Performance Summary -->
+                        <div class="performance-summary">
+                            <h4>Performance Summary</h4>
+                            <div class="summary-content">
+                                <div class="progress-circle">
+                                    <svg viewBox="0 0 36 36" class="circular-chart">
+                                        <path class="circle-bg" d="M18 2.0845
+                                          a 15.9155 15.9155 0 0 1 0 31.831
+                                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="circle-fill" stroke-dasharray="{{ result.score }}, 100" d="M18 2.0845
+                                          a 15.9155 15.9155 0 0 1 0 31.831
+                                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <text x="18" y="20.5" class="percentage">{{ result.score }}%</text>
+                                    </svg>
+                                </div>
+                                <div class="summary-text">
+                                    {% if result.score >= result.quiz.passing_score %}
+                                    <p class="result-passed">You passed this quiz!</p>
+                                    {% else %}
+                                    <p class="result-failed">You didn't pass this time. Keep trying!</p>
+                                    {% endif %}
+                                    <p><strong>Date Taken:</strong> {{ result.created_at|date:"F j, Y" }}</p>
+                                    <p><strong>Time Limit:</strong> {{ result.quiz.time_limit }} minutes</p>
+                                    <p><strong>Passing Score:</strong> {{ result.quiz.passing_score }}%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Feedback -->
+                        <div class="ai-feedback">
+                            <h4>AI Feedback & Recommendations</h4>
+                            <div class="feedback-card">
+                                {% if result.feedback %}
+                                <div class="feedback-section">
+                                    <h5>Overall Feedback</h5>
+                                    <p>{{ result.feedback }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if result.hint %}
+                                <div class="feedback-section">
+                                    <h5>Improvement Hint</h5>
+                                    <p>{{ result.hint }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if result.ai_change %}
+                                <div class="feedback-section">
+                                    <h5>AI Adaptations</h5>
+                                    <p>{{ result.ai_change }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Question Breakdown -->
+                        <div class="question-breakdown">
+                            <h4>Question-by-Question Results</h4>
+                            <div class="questions-list">
+                                {% for question in result.quiz.quiz_question.all %}
+                                {% with response=question.user_responses.0 %}
+                                <div
+                                    class="question-item {% if response.is_correct %}correct{% else %}incorrect{% endif %}">
+                                    <div class="question-header">
+                                        <h5>Question {{ question.order }}</h5>
+                                        <span class="question-status">
+                                            {% if response.is_correct %}
+                                            ✓ Correct ({{ question.points }} pts)
+                                            {% else %}
+                                            ✗ Incorrect (0 pts)
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <p class="question-text">{{ question.question_text }}</p>
+
+                                    {% if response %}
+                                    <div class="response-details">
+                                        <p><strong>Your answer:</strong> {{ response.response }}</p>
+                                        {% if response.feedback %}
+                                        <p><strong>Feedback:</strong> {{ response.feedback }}</p>
+                                        {% endif %}
+                                        {% if question.explanation %}
+                                        <p><strong>Explanation:</strong> {{ question.explanation }}</p>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endwith %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Leaderboard -->
+                        <div class="leaderboard-section">
+                            <h4>Leaderboard</h4>
+                            <div class="leaderboard-card">
+                                <div class="leaderboard-header">
+                                    <span>Rank</span>
+                                    <span>User</span>
+                                    <span>Score</span>
+                                </div>
+                                <div class="leaderboard-list">
+                                    {% for entry in leaderboards.result.quiz.id %}
+                                    <div class="leaderboard-row {% if entry.data.user == request.user %}current-user{% endif %}">
+                                        <span class="rank">{{ entry.position }}</span>
+                                        <span class="user">
+                                            {% if entry.data.user == request.user %}
+                                            You
+                                            {% else %}
+                                            {{ entry.data.user.username }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="score">{{ entry.data.score }}%</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>You haven't taken any quizzes yet.</p>
+            <a href="{% url 'learningapp:courses' %}" class="btn primary">Browse Courses</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    function toggleQuizDetails(id) {
+        const content = document.getElementById(id);
+        const btn = content.previousElementSibling.querySelector('.toggle-btn');
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+        content.hidden = isExpanded;
+        btn.setAttribute('aria-expanded', !isExpanded);
+        btn.querySelector('.arrow-icon').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+</script>
+{% endblock %}

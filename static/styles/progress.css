@@ -1,0 +1,305 @@
+/* Progress Tracking Page */
+.progress-tracking {
+    padding: 2rem 0;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.page-title {
+    color: #1e293b;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.progress-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.summary-card h3 {
+    color: #64748b;
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.big-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #334155;
+    margin: 0;
+}
+
+/* Course Progress Items */
+.course-progress-item {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.course-header:hover {
+    background-color: #f8fafc;
+}
+
+.course-info {
+    flex: 1;
+}
+
+.course-info h3 {
+    margin: 0 0 0.5rem;
+    color: #1e293b;
+}
+
+.progress-bar {
+    height: 1.5rem;
+    background: #e2e8f0;
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 0.75rem;
+    transition: width 0.5s ease;
+}
+
+.progress-bar span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    margin-left: 1rem;
+    cursor: pointer;
+}
+
+.arrow-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: #64748b;
+    transition: transform 0.2s ease;
+}
+
+[aria-expanded="true"] .arrow-icon {
+    transform: rotate(90deg);
+}
+
+/* Progress Details */
+.progress-details {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.performance-section h4,
+.analysis-section h4,
+.engagement-section h4 {
+    color: #334155;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+/* Chart Styles */
+.chart-container {
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-placeholder {
+    text-align: center;
+}
+
+.chart-placeholder p {
+    margin: 0 0 1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.mock-chart {
+    display: flex;
+    height: 200px;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding: 0 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.chart-bar {
+    width: 15%;
+    background: #3b82f6;
+    border-radius: 0.25rem 0.25rem 0 0;
+    transition: height 0.5s ease;
+}
+
+.chart-labels {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Strengths & Weaknesses */
+.strengths-weaknesses {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.strengths ul,
+.weaknesses ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.strengths li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    color: #16a34a;
+}
+
+.weaknesses li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    color: #dc2626;
+}
+
+.empty-message {
+    color: #64748b;
+    font-style: italic;
+}
+
+/* AI Suggestions */
+.ai-suggestions {
+    background: #f0f9ff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.suggestion-card p {
+    margin-top: 0;
+    color: #334155;
+}
+
+.suggestion-card ul {
+    padding-left: 1.25rem;
+    color: #334155;
+}
+
+.suggestion-card li {
+    margin-bottom: 0.5rem;
+}
+
+/* Engagement Metrics */
+.engagement-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.metric {
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.metric-value {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.btn.primary {
+    background: #3b82f6;
+    color: white;
+    border: 1px solid #3b82f6;
+}
+
+.btn.primary:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+}

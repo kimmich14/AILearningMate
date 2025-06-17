@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'styles/instructor_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="instructor-dashboard">
+  <!-- Instructor Profile Section -->
+  <div class="profile-header">
+    <div class="profile-image">
+      {% if profile.user_image %}
+      <img src="{{ profile.user_image.url }}" alt="{{ instructor.username }}">
+      {% else %}
+      <div class="profile-initial">{{ instructor.username|first|upper }}</div>
+      {% endif %}
+    </div>
+    <div class="profile-meta">
+      <h1>Welcome, {{ profile.full_name|default:instructor.username }}</h1>
+      <p class="profile-email">{{ instructor.email }}</p>
+      <p class="profile-bio">{{ profile.about|default:"Instructor at AI LearnMate" }}</p>
+    </div>
+    <div class="profile-actions">
+      <button class="btn primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+        <i class="fas fa-plus"></i> Add Course
+      </button>
+    </div>
+  </div>
+
+  <!-- Courses Section -->
+  <div class="courses-container">
+    <h2>Your Courses</h2>
+
+    {% if not course_data %}
+    <div class="no-courses">
+      <p>You haven't created any courses yet.</p>
+      <button class="btn primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+        <i class="fas fa-plus"></i> Create Your First Course
+      </button>
+    </div>
+    {% endif %}
+
+    <div class="courses-list">
+      {% for data in course_data %}
+      <div class="course-item">
+        <div class="course-header" onclick="toggleCourse('course-{{ data.course.id }}')">
+          <div class="course-title-wrapper">
+            {% if data.course.course_image %}
+            <img src="{{ data.course.course_image.url }}" class="course-thumbnail" alt="{{ data.course.title }}">
+            {% endif %}
+            <h3>{{ data.course.title }}</h3>
+          </div>
+          <div class="course-meta">
+            <span class="enrollment-count">{{ data.enrollments|length }} students</span>
+            <button class="toggle-btn" aria-expanded="false" aria-controls="course-{{ data.course.id }}">
+              <svg class="arrow-icon" viewBox="0 0 24 24">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="course-{{ data.course.id }}" class="course-content" hidden>
+          <!-- Student Analytics Section -->
+          <div class="analytics-section">
+            <h4>Student Analytics</h4>
+
+            <div class="analytics-grid">
+              <!-- Average Progress -->
+              <div class="analytics-card">
+                <h5>Average Progress</h5>
+                <div class="progress-container">
+                  <div class="progress-bar" style="width: {{ data.avg_progress }}%">
+                    <span>{{ data.avg_progress|floatformat:1 }}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Problem Areas -->
+              <div class="analytics-card">
+                <h5>Problem Areas</h5>
+                {% if data.problem_areas %}
+                <ul class="problem-list">
+                  {% for area in data.problem_areas %}
+                  <li>
+                    <span class="topic">{{ area.topic }}</span>
+                    <span class="badge">{{ area.students_struggling }} struggling</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <p class="no-data">No significant problem areas identified yet.</p>
+                {% endif %}
+              </div>
+
+              <!-- AI Recommendations -->
+              <div class="analytics-card">
+                <h5>AI Suggestions</h5>
+                <div class="recommendations">
+                  {% for rec in data.ai_recommendations %}
+                  <div class="recommendation-item">
+                    <i class="fas fa-lightbulb"></i>
+                    <p>{{ rec }}</p>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <!-- Enrolled Students -->
+              <div class="analytics-card">
+                <h5>Enrolled Students</h5>
+                <div class="students-list">
+                  {% for enrollment in data.enrollments %}
+                  <div class="student-item">
+                    <span class="student-name">{{ enrollment.user.username }}</span>
+                    <span class="student-progress">{{ enrollment.progress }}%</span>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Management Section -->
+          <div class="content-section">
+            <div class="section-header">
+              <h4>Content Management</h4>
+              <div class="section-actions">
+                <button class="btn primary small" data-bs-toggle="modal"
+                  data-bs-target="#addLessonModal-{{ data.course.id }}">
+                  <i class="fas fa-plus"></i> Add Lesson
+                </button>
+                <button class="btn primary small" data-bs-toggle="modal"
+                  data-bs-target="#addQuizModal-{{ data.course.id }}">
+                  <i class="fas fa-plus"></i> Add Quiz
+                </button>
+              </div>
+            </div>
+
+            <!-- Lessons List -->
+            <div class="lessons-list">
+              <h5>Lessons</h5>
+              {% if data.lessons %}
+              {% for lesson in data.lessons %}
+              <div class="lesson-item">
+                <div class="lesson-header">
+                  <h6>{{ lesson.title }}</h6>
+                  <div class="lesson-actions">
+                    <button class="btn small"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn danger small"><i class="fas fa-trash"></i> Delete</button>
+                  </div>
+                </div>
+
+                <!-- Lesson Materials -->
+                {% with materials=data.lesson_materials|slice:forloop.counter0|first %}
+                <div class="materials-section">
+                  <div class="materials-tabs">
+                    <button class="tab-btn active" data-target="images-{{ lesson.id }}">Images ({{materials.images|length }})</button>
+                    <button class="tab-btn" data-target="videos-{{ lesson.id }}">Videos ({{ materials.videos|length}})</button>
+                  </div>
+
+                  <!-- Images Tab -->
+                  <div id="images-{{ lesson.id }}" class="tab-content active">
+                    {% if materials.images %}
+                    <div class="materials-grid">
+                      {% for image in materials.images %}
+                      <div class="material-item">
+                        {% if image.image %}
+                        <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                        {% else %}
+                        <img src="{{ image.image_url }}" alt="{{ image.caption }}">
+                        {% endif %}
+                        <div class="material-actions">
+                          <button class="btn small"><i class="fas fa-edit"></i></button>
+                          <button class="btn danger small"><i class="fas fa-trash"></i></button>
+                        </div>
+                        {% if image.caption %}<p class="caption">{{ image.caption }}</p>{% endif %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="no-data">No images added for this lesson.</p>
+                    {% endif %}
+                    <button class="btn primary small">
+                      <i class="fas fa-plus"></i> Add Image
+                    </button>
+                  </div>
+
+                  <!-- Videos Tab -->
+                  <div id="videos-{{ lesson.id }}" class="tab-content">
+                    {% if materials.videos %}
+                    <div class="materials-grid">
+                      {% for video in materials.videos %}
+                      <div class="material-item">
+                        {% if video.video_file %}
+                        <video controls>
+                          <source src="{{ video.video_file.url }}" type="video/mp4">
+                        </video>
+                        {% else %}
+                        <iframe src="{{ video.video_url }}" frameborder="0" allowfullscreen></iframe>
+                        {% endif %}
+                        <div class="material-actions">
+                          <button class="btn small"><i class="fas fa-edit"></i></button>
+                          <button class="btn danger small"><i class="fas fa-trash"></i></button>
+                        </div>
+                        {% if video.title %}<h6>{{ video.title }}</h6>{% endif %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="no-data">No videos added for this lesson.</p>
+                    {% endif %}
+                    <button class="btn primary small">
+                      <i class="fas fa-plus"></i> Add Video
+                    </button>
+                  </div>
+                </div>
+                {% endwith %}
+              </div>
+              {% endfor %}
+              {% else %}
+              <p class="no-data">No lessons added yet.</p>
+              {% endif %}
+            </div>
+
+            <!-- Quizzes List -->
+            <div class="quizzes-list">
+              <h5>Quizzes</h5>
+              {% if data.quizzes %}
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Lesson</th>
+                      <th>Questions</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for quiz in data.quizzes %}
+                    <tr>
+                      <td>{{ quiz.title }}</td>
+                      <td>{{ quiz.lesson.title }}</td>
+                      <td>{{ quiz.quiz_question.count }}</td>
+                      <td class="actions">
+                        <button class="btn small"><i class="fas fa-edit"></i></button>
+                        <button class="btn danger small"><i class="fas fa-trash"></i></button>
+                        <button class="btn info small"><i class="fas fa-chart-bar"></i> Results</button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <p class="no-data">No quizzes added yet.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Add Course Modal -->
+  <div class="modal fade" id="addCourseModal" tabindex="-1" aria-hidden="true" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create New Course</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form method="post" action="#" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="courseTitle">Course Title</label>
+              <input type="text" id="courseTitle" name="title" required>
+            </div>
+            <div class="form-group">
+              <label for="courseSubject">Subject</label>
+              <input type="text" id="courseSubject" name="subject" required>
+            </div>
+            <div class="form-group">
+              <label for="courseDifficulty">Difficulty</label>
+              <select id="courseDifficulty" name="difficulty" required>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="courseImage">Course Image</label>
+              <input type="file" id="courseImage" name="course_image" accept="image/*">
+            </div>
+            <div class="form-group">
+              <label for="courseDescription">Description</label>
+              <textarea id="courseDescription" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="learningOutcomes">Learning Outcomes</label>
+              <textarea id="learningOutcomes" name="learning_outcomes" rows="4"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn primary">Create Course</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Lesson Modal (Example for one course, would be repeated for each course) -->
+  {% for data in course_data %}
+  <div class="modal fade" id="addLessonModal-{{ data.course.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Lesson to {{ data.course.title }}</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form method="post" action="#">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="lessonTitle-{{ data.course.id }}">Lesson Title</label>
+              <input type="text" id="lessonTitle-{{ data.course.id }}" name="title" required>
+            </div>
+            <div class="form-group">
+              <label for="lessonOrder-{{ data.course.id }}">Order</label>
+              <input type="number" id="lessonOrder-{{ data.course.id }}" name="order" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="lessonContent-{{ data.course.id }}">Content</label>
+              <textarea id="lessonContent-{{ data.course.id }}" name="content" rows="6" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn primary">Add Lesson</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+
+<script>
+  // Toggle course content
+  function toggleCourse(id) {
+    const content = document.getElementById(id);
+    const btn = content.previousElementSibling.querySelector('.toggle-btn');
+    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+    content.hidden = isExpanded;
+    btn.setAttribute('aria-expanded', !isExpanded);
+    btn.querySelector('.arrow-icon').style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+  }
+
+  // Tab switching for materials
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const targetId = this.getAttribute('data-target');
+      const tabContainer = this.closest('.materials-tabs').parentElement;
+
+      // Update active tab
+      tabContainer.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      // Update active content
+      tabContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tabContainer.querySelector(`#${targetId}`).classList.add('active');
+    });
+  });
+
+  // Initialize Bootstrap tooltips
+  document.addEventListener('DOMContentLoaded', function () {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize all modals
+    var modals = document.querySelectorAll('.modal');
+
+    modals.forEach(function (modal) {
+      modal.style.display = 'none'; // Hide initially
+      modal.classList.remove('show'); // Ensure not shown
+
+      // Properly initialize each modal
+      var modalInstance = new bootstrap.Modal(modal, {
+        backdrop: true,
+        focus: true,
+        keyboard: true
+      });
+
+      // Connect triggers
+      document.querySelectorAll('[data-bs-toggle="modal"][data-bs-target="#' + modal.id + '"]').forEach(function (trigger) {
+        trigger.addEventListener('click', function () {
+          modalInstance.show();
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}
