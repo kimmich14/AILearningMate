@@ -130,11 +130,7 @@
                 <button class="btn primary small" data-bs-toggle="modal"
                   data-bs-target="#addLessonModal-{{ data.course.id }}">
                   <i class="fas fa-plus"></i> Add Lesson
-                </button>
-                <button class="btn primary small" data-bs-toggle="modal"
-                  data-bs-target="#addQuizModal-{{ data.course.id }}">
-                  <i class="fas fa-plus"></i> Add Quiz
-                </button>
+                </button>          
               </div>
             </div>
 
@@ -149,6 +145,9 @@
                   <div class="lesson-actions">
                     <button class="btn small"><i class="fas fa-edit"></i> Edit</button>
                     <button class="btn danger small"><i class="fas fa-trash"></i> Delete</button>
+                    <button class="btn primary small open-modal" data-modal="addQuizModal-{{ lesson.id }}">
+                      <i class="fas fa-plus"></i> Add Quiz
+                    </button>   
                   </div>
                 </div>
 
@@ -218,6 +217,78 @@
                 </div>
                 {% endwith %}
               </div>
+              <div class="custom-modal" id="addQuizModal-{{ lesson.id }}">
+                <div class="modal-content">
+                  <span class="close-modal" data-modal="addQuizModal-{{ lesson.id }}">&times;</span>
+                  <h3>Add Quiz for "{{ lesson.title }}"</h3>
+              
+                  <form method="POST" class="create-quiz-form" data-modal="addQuizModal-{{ lesson.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="lesson" value="{{ lesson.id }}">
+              
+                    <label>Title</label>
+                    <input type="text" name="title" required>
+              
+                    <label>Description</label>
+                    <textarea name="description" rows="3"></textarea>
+              
+                    <label>Passing Score (%)</label>
+                    <input type="number" name="passing_score" value="70" min="1" max="100">
+              
+                    <label>Max Attempts</label>
+                    <input type="number" name="max_attempts" value="3" min="1">
+              
+                    <label>Time Limit (minutes)</label>
+                    <input type="number" name="time_limit" value="30" min="1">
+              
+                    <label>Difficulty</label>
+                    <select name="difficulty" required>
+                      <option value="">-- Select Difficulty --</option>
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+              
+                    <div class="modal-actions">
+                      <button type="submit" class="btn primary">Create Quiz</button>
+                      <button type="button" class="btn secondary close-modal"
+                        data-modal="addQuizModal-{{ lesson.id }}">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <style>
+                .custom-modal {
+                  display: none;
+                  position: fixed;
+                  z-index: 1000;
+                  top: 0; left: 0;
+                  width: 100vw;
+                  height: 100vh;
+                  background: rgba(0, 0, 0, 0.6);
+                  overflow: auto;
+                  padding: 20px;
+                }
+
+                .modal-content {
+                  background: white;
+                  max-width: 600px;
+                  margin: auto;
+                  padding: 20px;
+                  border-radius: 8px;
+                  position: relative;
+                  max-height: 90vh;
+                  overflow-y: auto;
+                }
+
+                .modal-actions {
+                  display: flex;
+                  justify-content: flex-end;
+                  gap: 10px;
+                  margin-top: 20px;
+                }
+
+              </style>         
               {% endfor %}
               {% else %}
               <p class="no-data">No lessons added yet.</p>
@@ -245,7 +316,81 @@
                       <td>{{ quiz.lesson.title }}</td>
                       <td>{{ quiz.quiz_question.count }}</td>
                       <td class="actions">
-                        <button class="btn small"><i class="fas fa-edit"></i></button>
+                        <button class="btn small open-modal" data-modal="addQuestionModal-{{ quiz.id }}">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <div class="custom-modal" id="addQuestionModal-{{ quiz.id }}">
+                          <div class="modal-content">
+                            <span class="close-modal" data-modal="addQuestionModal-{{ quiz.id }}">&times;</span>
+                            <h3>Add Question to "{{ quiz.title }}"</h3>
+                        
+                            <form class="add-question-form" data-modal="addQuestionModal-{{ quiz.id }}" method="POST">
+                              {% csrf_token %}
+                              <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        
+                              <label>Question Text</label>
+                              <textarea name="question_text" required></textarea>
+                        
+                              <label>Question Type</label>
+                              <select name="question_type" required>
+                                <option value="MC">Multiple Choice</option>
+                                <option value="TF">True/False</option>
+                                <option value="SA">Short Answer</option>
+                                <option value="FB">Fill in the Blank</option>
+                              </select>
+                        
+                              <label>Points</label>
+                              <input type="number" name="points" value="1" min="1" required>
+                        
+                              <label>Explanation</label>
+                              <textarea name="explanation"></textarea>
+                        
+                              <label>Hint</label>
+                              <textarea name="hint"></textarea>
+                        
+                              <label>Order (optional)</label>
+                              <input type="number" name="order" min="0">
+                        
+                              <div class="modal-actions">
+                                <button type="submit" class="btn primary">Save Question</button>
+                                <button type="button" class="btn secondary close-modal"
+                                  data-modal="addQuestionModal-{{ quiz.id }}">Cancel</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                        <style>
+                          .custom-modal {
+                            display: none;
+                            position: fixed;
+                            z-index: 1000;
+                            top: 0;
+                            left: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            background: rgba(0, 0, 0, 0.6);
+                            overflow: auto;
+                            padding: 20px;
+                          }
+                        
+                          .modal-content {
+                            background: white;
+                            max-width: 600px;
+                            margin: auto;
+                            padding: 20px;
+                            border-radius: 8px;
+                            position: relative;
+                            max-height: 90vh;
+                            overflow-y: auto;
+                          }
+                        
+                          .modal-actions {
+                            display: flex;
+                            justify-content: flex-end;
+                            gap: 10px;
+                            margin-top: 20px;
+                          }
+                        </style>                                                         
                         <button class="btn danger small"><i class="fas fa-trash"></i></button>
                         <button class="btn info small"><i class="fas fa-chart-bar"></i> Results</button>
                       </td>
@@ -352,6 +497,8 @@
     </div>
   </div>
   {% endfor %}
+    
+
 </section>
 
 <script>
@@ -416,4 +563,108 @@
     });
   });
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const openButtons = document.querySelectorAll(".open-modal");
+    const closeButtons = document.querySelectorAll(".close-modal");
+
+    openButtons.forEach(btn => {
+      btn.addEventListener("click", function () {
+        const modalId = this.getAttribute("data-modal");
+        document.getElementById(modalId).style.display = "block";
+      });
+    });
+
+    closeButtons.forEach(btn => {
+      btn.addEventListener("click", function () {
+        const modalId = this.getAttribute("data-modal");
+        document.getElementById(modalId).style.display = "none";
+      });
+    });
+
+    // Close modal when clicking outside the modal content
+    window.addEventListener("click", function (e) {
+      document.querySelectorAll(".custom-modal").forEach(modal => {
+        if (e.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    $(".create-quiz-form").on("submit", function (e) {
+      e.preventDefault();
+
+      const form = $(this);
+      const modalId = form.data("modal");
+      const modal = $("#" + modalId);
+
+      // Gather form values
+      const formData = {
+        title: form.find("input[name='title']").val(),
+        lesson: form.find("input[name='lesson']").val(), // ✅ correct
+        description: form.find("textarea[name='description']").val(),
+        passing_score: form.find("input[name='passing_score']").val(),
+        max_attempts: form.find("input[name='max_attempts']").val(),
+        time_limit: form.find("input[name='time_limit']").val(),
+        difficulty: form.find("select[name='difficulty']").val(),
+        csrfmiddlewaretoken: form.find("input[name='csrfmiddlewaretoken']").val()
+      };
+
+      $.ajax({
+        url: "{% url 'learningapp:create_quiz' %}",  // URL from your view
+        type: "POST",
+        data: formData,
+        success: function (response) {
+          alert("Quiz created successfully!");
+          form.trigger("reset");
+          modal.hide();
+        },
+        error: function (xhr) {
+          alert("Error: " + xhr.responseText);
+        }
+      });
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    $(".add-question-form").on("submit", function (e) {
+      e.preventDefault();
+
+      const form = $(this);
+      const modalId = form.data("modal");
+      const modal = $("#" + modalId);
+
+      const formData = {
+        quiz_id: form.find("input[name='quiz_id']").val(),
+        question_text: form.find("textarea[name='question_text']").val(),
+        question_type: form.find("select[name='question_type']").val(),
+        points: form.find("input[name='points']").val(),
+        explanation: form.find("textarea[name='explanation']").val(),
+        hint: form.find("textarea[name='hint']").val(),
+        order: form.find("input[name='order']").val(),
+        csrfmiddlewaretoken: form.find("input[name='csrfmiddlewaretoken']").val()
+      };
+
+      $.ajax({
+        url: "{% url 'learningapp:add_question' %}", // define this view
+        method: "POST",
+        data: formData,
+        success: function (response) {
+          alert("Question added!");
+          form.trigger("reset");
+          modal.hide();
+        },
+        error: function (xhr) {
+          alert("Error: " + xhr.responseText);
+        }
+      });
+    });
+  });
+</script>
+
 {% endblock %}

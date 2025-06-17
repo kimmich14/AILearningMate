@@ -103,7 +103,7 @@ class QuizQuestion(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return f"{self.quiz.title} - Question #{self.order}"
+        return f"{self.quiz.title} - Question #{self.order + 1}"
     
 class UserResponse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_response')
@@ -111,6 +111,7 @@ class UserResponse(models.Model):
     response = models.CharField(max_length=200)
     feedback = models.TextField(blank=True, help_text="Feedback specific to this question")
     is_correct = models.BooleanField(default=False)
+    points = models.FloatField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -119,9 +120,11 @@ class UserResponse(models.Model):
 class QuizResult(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_result')
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_result')
+    attempts = models.IntegerField(default=0)
     feedback = models.TextField(blank=True, help_text="Feedback specific to this quiz")
     ai_change = models.TextField(blank=True, help_text="Changes made to this quiz")
     hint = models.TextField(blank=True, help_text="Hint for improvement")
+    score = models.FloatField(default=0)
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 

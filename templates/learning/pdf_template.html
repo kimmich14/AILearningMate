@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Result - {{ result.quiz.title }}</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            padding: 2rem;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #004b8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1rem;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            font-size: 0.9rem;
+            padding: 0.3rem 0.6rem;
+            background: #eee;
+            border-radius: 4px;
+        }
+
+        .passed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .failed {
+            background: #fed7d7;
+            color: #822727;
+        }
+
+        .question {
+            margin-bottom: 1.5rem;
+        }
+
+        .question.correct {
+            background: #f0fff4;
+            padding: 1rem;
+            border-left: 4px solid #38a169;
+        }
+
+        .question.incorrect {
+            background: #fff5f5;
+            padding: 1rem;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.2rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Quiz Result Summary</h1>
+
+    <div class="section quiz-header">
+        <div>
+            <h2>{{ result.quiz.title }}</h2>
+            <p class="meta">Taken by: {{ user.get_full_name|default:user.username }} on {{ result.created_at|date:"F j,
+                Y" }}</p>
+        </div>
+        <div>
+            <span class="badge {% if result.score >= result.quiz.passing_score %}passed{% else %}failed{% endif %}">
+                Score: {{ result.score }}%
+            </span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Performance Summary</h3>
+        <p><strong>Passing Score:</strong> {{ result.quiz.passing_score }}%</p>
+        <p><strong>Time Limit:</strong> {{ result.quiz.time_limit }} minutes</p>
+        <p><strong>Feedback:</strong> {{ result.feedback }}</p>
+        <p><strong>Hint:</strong> {{ result.hint }}</p>
+        <p><strong>AI Suggestions:</strong> {{ result.ai_change }}</p>
+    </div>
+
+    <div class="section">
+        <h3>Question-by-Question Breakdown</h3>
+        {% for question in questions %}
+        {% with response=question.user_responses.0 %}
+        <div class="question {% if response.is_correct %}correct{% else %}incorrect{% endif %}">
+            <p><strong>Q{{ forloop.counter }}:</strong> {{ question.question_text }}</p>
+            <p><strong>Your Answer:</strong> {{ response.response }}</p>
+            <p><strong>Feedback:</strong> {{ response.feedback }}</p>
+            <p><strong>Explanation:</strong> {{ question.explanation }}</p>
+            <p class="meta">Points: {% if response.is_correct %}{{ question.points }}{% else %}0{% endif %}</p>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div class="footer">
+        © {{ now|date:"Y" }} AI LearnMate · Generated on {{ now|date:"F j, Y" }}
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="locked-quiz">
+    <div class="container">
+        <h2>This quiz is locked</h2>
+        <p>You have used all {{ max_attempts }} allowed attempts for "{{ quiz.title }}".</p>
+        <a href="{% url 'learningapp:assessments' %}" class="btn">Back to Results</a>
+    </div>
+</section>
+{% endblock %}
