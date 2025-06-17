@@ -17,6 +17,10 @@ class MyUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+    
+    def create_user(self, email, password=None, **extrafields):  # ✅ ADD THIS METHOD
+        extrafields.setdefault('is_active', True)
+        return self._createuser(email, password, **extrafields)
 
     def create_superuser(self, email, password, **extrafields):
         extrafields.setdefault('is_staff', True)
