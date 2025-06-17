@@ -20,4 +20,5 @@ urlpatterns = [
     path('submit-quiz/', views.submit_quiz, name='submit_quiz'),
     path("quiz/<int:quiz_id>/start/", views.start_quiz, name="start_quiz"),
     path("quiz-result/<int:result_id>/pdf/", views.export_quiz_pdf, name="export_quiz_pdf"),
+    path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
 ]

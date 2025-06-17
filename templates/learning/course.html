@@ -25,6 +25,39 @@
                     <p>{{ course.learning_outcomes }}</p>
                 </div>
             </div>
+            <div class="enrollment-section">
+                {% if is_enrolled %}
+                <span class="badge enrolled-badge">✔ Enrolled</span>
+                {% else %}
+                <button class="btn primary" id="enroll-btn">Enroll in Course</button>
+                {% if not is_enrolled %}
+                <div id="enrollment-lock-msg" style="
+                    position: absolute; top: 0; left: 0;
+                    width: 75%; height: 100%;
+                    background: rgba(255,255,255,0.85);
+                    z-index: 999;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.5rem; font-weight: bold;
+                ">
+                    Please enroll to access the full course content.
+                </div>
+                {% endif %}
+                <script>
+                    document.body.style.overflow = 'hidden';
+                    document.querySelector('.lessons-container').style.pointerEvents = 'none';
+                    document.querySelector('.lessons-container').style.opacity = 0.3;
+                </script>
+                {% endif %}
+            </div>
+            <style>
+                .enrolled-badge {
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                }
+            </style>
         </div>
 
         <!-- Lessons List -->
@@ -445,5 +478,24 @@
         });
     });
 </script>
-  
+<script>
+    $(document).ready(function () {
+        $("#enroll-btn").on("click", function () {
+            $.ajax({
+                url: "{% url 'learningapp:enroll_course' course.id %}",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                },
+                success: function (response) {
+                    alert("✅ Enrolled successfully!");
+                    location.reload();
+                },
+                error: function (xhr) {
+                    alert("❌ Enrollment failed: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

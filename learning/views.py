@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Course, Quiz, QuizQuestion, Lesson, LessonImage, LessonVideo, ProgressTracking, QuizResult, UserResponse, Discussion, Reply
+from .models import Course, Quiz, QuizQuestion, Lesson, LessonImage, LessonVideo, ProgressTracking, QuizResult, UserResponse, Discussion, Reply, Enrollment
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -27,22 +27,26 @@ def courses(request):
 @login_required
 def course_detail(request, course_id):
     course = get_object_or_404(Course.objects.prefetch_related(
-        Prefetch('lesson_course__quiz_lesson', queryset=Quiz.objects.prefetch_related('quiz_question')),
         'lesson_course__images',
-        'lesson_course__videos'
+        'lesson_course__videos',
+        'lesson_course__quiz_lesson__quiz_question'
     ), id=course_id)
-    
+
     lessons = course.lesson_course.all().order_by('order')
     discussions = Discussion.objects.filter(lesson__course=course).select_related('lesson', 'user')
 
+    # Group discussions
     lesson_discussions = defaultdict(list)
     for discussion in discussions:
         lesson_discussions[discussion.lesson_id].append(discussion)
+
+    is_enrolled = Enrollment.objects.filter(user=request.user, course=course).exists()
 
     context = {
         'course': course,
         'lessons': lessons,
         'lesson_discussions': dict(lesson_discussions),
+        'is_enrolled': is_enrolled
     }
     return render(request, 'learning/course.html', context)
 
@@ -364,3 +368,10 @@ def start_quiz(request, quiz_id):
         "quiz": quiz,
         "questions": quiz.quiz_question.all(),
     })
+    
+@require_POST
+@login_required
+def enroll_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    Enrollment.objects.get_or_create(user=request.user, course=course)
+    return JsonResponse({"message": "Enrolled successfully."})

@@ -60,7 +60,8 @@
         <div class="auth-buttons">
           {% if user.is_authenticated %}
           {% if user.learner %}
-          <a href="{% url 'learningapp:progress' %}" class="btn">Progress</a>
+          <a href="{% url 'learningapp:progress_tracking' %}" class="btn">Progress</a>
+          <a href="{% url 'learningapp:assessments' %}" class="btn">Assessments</a>
           {% endif %}
           <a href="{% url 'usersapp:profile' %}" class="btn">Profile</a>
           <a href="{% url 'usersapp:logout' %}" class="btn danger">Log Out</a>
