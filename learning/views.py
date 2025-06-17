@@ -9,7 +9,6 @@ import json
 from django.utils.timezone import now
 from difflib import SequenceMatcher
 from django.db.models import Avg
-from collections import defaultdict
 from django.db.models import Count, Q
 from django.template.loader import render_to_string
 from weasyprint import HTML
