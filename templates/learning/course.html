@@ -30,6 +30,102 @@
                 <span class="badge enrolled-badge">✔ Enrolled</span>
                 {% else %}
                 <button class="btn primary" id="enroll-btn">Enroll in Course</button>
+                <!-- MPesa Payment Modal -->
+                <div id="mpesaModal" class="modal-overlay">
+                    <div class="modal-content">
+                        <span class="close-modal" id="closeModal">&times;</span>
+                        <h2>Complete Payment</h2>
+                        <p>You're enrolling for: <strong>{{ course.title }}</strong></p>
+                        <p>Course Price: <strong>KES {{ course.price }}</strong></p>
+                
+                        <form id="mpesa-payment-form">
+                            <!-- Hidden Course ID -->
+                            <input type="hidden" id="course_id" name="course_id" value="{{ course.id }}">
+                            <label for="phone">MPesa Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="e.g. 07XXXXXXXX" required />
+                
+                            <button type="submit" class="btn pay-btn">Pay Now</button>
+                        </form>
+                
+                        <div id="payment-status" style="margin-top: 1rem; color: green;"></div>
+                    </div>
+                </div>
+                <style>
+                    /* Modal Background */
+                    .modal-overlay {
+                    display: none;
+                    position: fixed;
+                    z-index: 999;
+                    left: 0; top: 0;
+                    width: 100%; height: 100%;
+                    background-color: rgba(0, 0, 0, 0.6);
+                    }
+
+                    /* Modal Box */
+                    .modal-content {
+                    background-color: #fff;
+                    margin: 10% auto;
+                    padding: 2rem;
+                    width: 90%;
+                    max-width: 400px;
+                    border-radius: 10px;
+                    position: relative;
+                    animation: fadeIn 0.3s ease-in-out;
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+                    }
+
+                    /* Close Button */
+                    .close-modal {
+                    position: absolute;
+                    top: 1rem;
+                    right: 1rem;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #888;
+                    cursor: pointer;
+                    }
+
+                    .close-modal:hover {
+                    color: #000;
+                    }
+
+                    /* Form Elements */
+                    #mpesa-payment-form label {
+                    display: block;
+                    margin-bottom: 0.5rem;
+                    font-weight: 500;
+                    }
+
+                    #mpesa-payment-form input {
+                    width: 100%;
+                    padding: 0.6rem;
+                    margin-bottom: 1rem;
+                    border: 1px solid #ccc;
+                    border-radius: 6px;
+                    }
+
+                    /* Buttons */
+                    .btn.pay-btn {
+                    width: 100%;
+                    padding: 0.7rem;
+                    background-color: #28a745;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    }
+
+                    .btn.pay-btn:hover {
+                    background-color: #218838;
+                    }
+
+                    /* Animation */
+                    @keyframes fadeIn {
+                    from {opacity: 0; transform: scale(0.9);}
+                    to {opacity: 1; transform: scale(1);}
+                    }
+                </style>
                 {% if not is_enrolled %}
                 <div id="enrollment-lock-msg" style="
                     position: absolute; top: 0; left: 0;
@@ -44,8 +140,10 @@
                 {% endif %}
                 <script>
                     document.body.style.overflow = 'hidden';
-                    document.querySelector('.lessons-container').style.pointerEvents = 'none';
-                    document.querySelector('.lessons-container').style.opacity = 0.3;
+                    if (document.querySelector('.lessons-container')) {
+                        document.querySelector('.lessons-container').style.pointerEvents = 'none';
+                        document.querySelector('.lessons-container').style.opacity = 0.3;
+                    }
                 </script>
                 {% endif %}
             </div>
@@ -478,7 +576,7 @@
         });
     });
 </script>
-<script>
+<!-- <script>
     $(document).ready(function () {
         $("#enroll-btn").on("click", function () {
             $.ajax({
@@ -497,5 +595,79 @@
             });
         });
     });
+</script> -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const enrollBtn = document.getElementById("enroll-btn");
+        const modal = document.getElementById("mpesaModal");
+        const closeModal = document.getElementById("closeModal");
+        const enroll_msg = document.getElementById('enrollment-lock-msg');
+
+        // Show modal when "Enroll in Course" is clicked
+        enrollBtn.addEventListener("click", function () {
+            enroll_msg.style.display = "none";
+            modal.style.display = "block";
+        });
+
+        // Close modal when "X" is clicked
+        closeModal.addEventListener("click", function () {
+            enroll_msg.style.display = "flex";
+            modal.style.display = "none";
+        });
+
+        // Optional: close modal when user clicks outside of modal content
+        window.addEventListener("click", function (e) {
+            if (e.target === modal) {
+                enroll_msg.style.display = "flex";
+                modal.style.display = "none";
+            }
+        });
+    });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#mpesa-payment-form").on("submit", function (e) {
+            e.preventDefault();
+
+            const phone = $("#phone").val();
+            const courseId = $("#course_id").val();
+
+            $.ajax({
+                url: "{% url 'learningapp:process_payment' %}",
+                method: "POST",
+                data: {
+                    phone: phone,
+                    course_id: courseId,
+                },
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $("#payment-status").text("📲 Prompt sent. Waiting for confirmation...");
+
+                        // Start polling every 3 seconds
+                        const intervalId = setInterval(function () {
+                            $.get(`/payment/status/${response.payment_id}/`, function (resp) {
+                                if (resp.status === "success") {
+                                    clearInterval(intervalId);
+                                    alert("✅ Payment successful! Enrolled in course.");
+                                    location.reload();
+                                } else if (resp.status === "failed") {
+                                    clearInterval(intervalId);
+                                    alert("❌ Payment failed. Please try again.");
+                                }
+                            });
+                        }, 3000);
+                    } else {
+                        alert("❌ Could not initiate payment.");
+                    }
+                },
+                error: function (xhr) {
+                    $("#payment-status").html("❌ Error: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>    
 {% endblock %}

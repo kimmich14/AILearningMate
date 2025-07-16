@@ -12,6 +12,7 @@
             <div class="course-info">
                 <h4><a href="{% url 'learningapp:course_detail' course.id %}" class="course-title"> {{course.title}} </a></h4>
                 <p class="course-summary">{{course.description}}</p>
+                <h5>KSh {{course.price}}</h5>
             </div>
         </div>
     {% endfor %}

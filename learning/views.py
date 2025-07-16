@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Course, Quiz, QuizQuestion, Lesson, LessonImage, LessonVideo, ProgressTracking, QuizResult, UserResponse, Discussion, Reply, Enrollment
+from .models import Course, Quiz, QuizQuestion, Lesson, LessonImage, LessonVideo, ProgressTracking, QuizResult, UserResponse, Discussion, Reply, Enrollment, Payment
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -13,6 +13,16 @@ from django.db.models import Count, Q
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
+import base64, requests
+from django.conf import settings
+import requests
+import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     return render(request, 'learning/home.html')
@@ -375,3 +385,146 @@ def enroll_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     Enrollment.objects.get_or_create(user=request.user, course=course)
     return JsonResponse({"message": "Enrolled successfully."})
+
+def send_stk_push(phone, amount, description, payment_id):
+    # STEP 1: Generate timestamp and password
+    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')  # e.g. 20250716205600
+    shortcode = settings.DARAJA_SHORTCODE
+    passkey = settings.DARAJA_PASSKEY
+
+    raw_password = shortcode + passkey + timestamp
+    password = base64.b64encode(raw_password.encode()).decode()
+
+    # STEP 2: Get access token
+    consumer_key = settings.DARAJA_CONSUMER_KEY
+    consumer_secret = settings.DARAJA_CONSUMER_SECRET
+
+    auth_response = requests.get(
+        "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+        auth=(consumer_key, consumer_secret)
+    )
+
+    access_token = auth_response.json().get("access_token")
+    if not access_token:
+        return {"status": "error", "message": "Failed to get access token"}
+
+    # STEP 3: Prepare STK Push request
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "BusinessShortCode": shortcode,
+        "Password": password,
+        "Timestamp": timestamp,
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": int(float(amount)),  # Ensure integer
+        "PartyA": phone,
+        "PartyB": shortcode,
+        "PhoneNumber": phone,
+        "CallBackURL": settings.DARAJA_CALLBACK_URL,
+        "AccountReference": f"Course-{payment_id}",
+        "TransactionDesc": description
+    }
+
+    response = requests.post(
+        "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+        headers=headers,
+        json=payload
+    )
+
+    if response.status_code == 200:
+        return {"status": "success", "response": response.json()}
+    else:
+        return {"status": "error", "message": response.text}
+
+@require_POST
+@login_required
+def process_payment(request):
+    user = request.user
+    phone = request.POST.get("phone")
+    course_id = request.POST.get("course_id")
+
+    if not phone or not course_id:
+        return JsonResponse({"status": "error", "message": "Missing phone or course ID"}, status=400)
+
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Course not found"}, status=404)
+
+    # Format phone (Safaricom expects 2547XXXXXXXX)
+    phone = phone.strip().replace(" ", "")
+    if phone.startswith("0"):
+        phone = "254" + phone[1:]
+
+    # Create a pending payment record
+    payment = Payment.objects.create(
+        user=user,
+        course=course,
+        success=False  # Mark as false until confirmation
+    )
+
+    # Trigger STK Push
+    response = send_stk_push(phone, course.price, course.title, payment.id)
+
+    if response.get("status") == "success":
+        # Save checkout ID to Payment
+        payment.checkout_id = response.get("CheckoutRequestID")
+        payment.save()
+        return JsonResponse({
+            "success": True,
+            "payment_id": payment.id  # after saving the Payment model
+        })
+    else:
+        return JsonResponse({"status": "error", "message": response.get("message", "STK Push failed")})
+    
+@csrf_exempt
+def mpesa_callback(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+
+        logger.info("📥 M-Pesa Callback: %s", json.dumps(data, indent=2))
+        stk_callback = data.get("Body", {}).get("stkCallback", {})
+
+        result_code = stk_callback.get("ResultCode")
+        checkout_id = stk_callback.get("CheckoutRequestID")
+
+        if not checkout_id:
+            logger.warning("🚫 Missing CheckoutRequestID in callback.")
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Missing checkout ID"}, status=400)
+
+        try:
+            payment = Payment.objects.get(checkout_id=checkout_id)
+        except Payment.DoesNotExist:
+            logger.error("❌ No Payment found with checkout_id=%s", checkout_id)
+            return JsonResponse({"ResultCode": 1, "ResultDesc": "Payment not found"}, status=404)
+
+        if result_code == 0:
+            # Mark payment as successful
+            payment.success = True
+            payment.save()
+
+            # Enroll the user in the course
+            Enrollment.objects.get_or_create(user=payment.user, course=payment.course)
+
+            logger.info("✅ Payment success recorded. User enrolled.")
+        else:
+            logger.warning("❌ STK Push failed. ResultCode: %s", result_code)
+
+        return JsonResponse({"ResultCode": 0, "ResultDesc": "Callback handled successfully"})
+
+    except Exception as e:
+        logger.exception("💥 Callback processing failed")
+        return JsonResponse({"ResultCode": 1, "ResultDesc": "Internal error"}, status=500)
+
+def check_payment_status(request, payment_id):
+    try:
+        payment = Payment.objects.get(pk=payment_id)
+        if payment.success:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "pending"})
+    except Payment.DoesNotExist:
+        return JsonResponse({"status": "failed"})

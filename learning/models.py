@@ -13,6 +13,7 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_ai_recommended = models.BooleanField(default=False)
+    price = models.FloatField(default=1799.99)
 
     def __str__(self):
         return self.title
@@ -25,6 +26,16 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.course.title}"
+    
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payment_user')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='payment_course')
+    paid_at = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(default=False)
+    checkout_id = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.price}"
     
 class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lesson_course')
@@ -115,7 +126,7 @@ class UserResponse(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.question.text}"
+        return f"{self.user.username} - {self.question.question_text}"
     
 class QuizResult(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_result')
@@ -132,7 +143,7 @@ class QuizResult(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return f"Answer for {self.question.question_text[:50]}"
+        return f"Result for {self.quiz.title}"
     
 class Discussion(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='discussion_lesson')
@@ -150,7 +161,7 @@ class Reply(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.course.title}"
+        return f"{self.user.username} - {self.message}"
     
 class ProgressTracking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='progress_user')
