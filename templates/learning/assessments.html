@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load dict_get %}
 {% block content %}
 <section class="adaptive-quizzes">
     <div class="container">
@@ -20,9 +21,11 @@
                             class="score-badge {% if result.score >= result.quiz.passing_score %}passed{% else %}failed{% endif %}">
                             Score: {{ result.score }}%
                         </span>
-                        {% if passed_courses[result.quiz.lesson.course.id] %}
-                        <span class="badge complete-badge">🏅 Course Mastered</span>
-                        {% endif %}
+                        {% with course_id=result.quiz.lesson.course.id %}
+                            {% if passed_courses|dict_get:course_id %}
+                            <span class="badge complete-badge">🏅 Course Mastered</span>
+                            {% endif %}
+                        {% endwith %}
                     </div>
                     <button class="toggle-btn" aria-expanded="false" aria-controls="quiz-{{ result.id }}">
                         <svg class="arrow-icon" viewBox="0 0 24 24">
@@ -48,7 +51,7 @@
                                         <text x="18" y="20.5" class="percentage">{{ result.score }}%</text>
                                     </svg>
                                 </div>
-                                <p><strong>Average Score (All Users):</strong> {{ average_scores[result.quiz.id] }}%</p>
+                                <p><strong>Average Score (All Users):</strong> {{ average_scores|dict_get:result.quiz.id }}%</p>
                                 <div class="summary-text">
                                     {% if result.score >= result.quiz.passing_score %}
                                     <p class="result-passed">You passed this quiz!</p>
@@ -140,19 +143,21 @@
                                     <span>Score</span>
                                 </div>
                                 <div class="leaderboard-list">
-                                    {% for entry in leaderboards[result.quiz.id] %}
-                                    <div class="leaderboard-row {% if entry.data.user == request.user %}current-user{% endif %}">
-                                        <span class="rank">{{ entry.position }}</span>
-                                        <span class="user">
-                                            {% if entry.data.user == request.user %}
-                                            You
-                                            {% else %}
-                                            {{ entry.data.user.username }}
-                                            {% endif %}
-                                        </span>
-                                        <span class="score">{{ entry.data.score }}%</span>
-                                    </div>
+                                    {% with leaderboards|dict_get:result.quiz.id as leaderboard_entries %}
+                                    {% for entry in leaderboard_entries %}
+                                        <div class="leaderboard-row {% if entry.data.user == request.user %}current-user{% endif %}">
+                                            <span class="rank">{{ entry.position }}</span>
+                                            <span class="user">
+                                                {% if entry.data.user == request.user %}
+                                                You
+                                                {% else %}
+                                                {{ entry.data.user.username }}
+                                                {% endif %}
+                                            </span>
+                                            <span class="score">{{ entry.data.score }}%</span>
+                                        </div>
                                     {% endfor %}
+                                    {% endwith %}
                                 </div>
                             </div>
                         </div>

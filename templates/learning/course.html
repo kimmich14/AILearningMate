@@ -29,6 +29,7 @@
                 {% if is_enrolled %}
                 <span class="badge enrolled-badge">✔ Enrolled</span>
                 {% else %}
+                {% if request.user.learner %}
                 <button class="btn primary" id="enroll-btn">Enroll in Course</button>
                 <!-- MPesa Payment Modal -->
                 <div id="mpesaModal" class="modal-overlay">
@@ -126,7 +127,8 @@
                     to {opacity: 1; transform: scale(1);}
                     }
                 </style>
-                {% if not is_enrolled %}
+                {% endif %}
+                {% if not is_enrolled and course.instructor != request.user %}
                 <div id="enrollment-lock-msg" style="
                     position: absolute; top: 0; left: 0;
                     width: 75%; height: 100%;
