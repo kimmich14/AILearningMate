@@ -61,16 +61,18 @@
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-                .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    }
-                    return response.json();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.error) {
+                    alert(data.error); // Or show in DOM
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         });
     });
 </script>
-{% endblock %}
+{% endblock %} 

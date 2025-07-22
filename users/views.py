@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .models import User, Profile
@@ -105,36 +106,37 @@ def user_login(request):
         profile = request.user.profile
         if (profile.full_name and profile.phone_number and 
             profile.about and profile.learning_level):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'redirect_url': reverse('learningapp:home')})
             messages.success(request, 'Login successful!')
             return redirect('learningapp:home')
 
     if request.method == 'POST':
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            # AJAX validation could go here if needed
-            return JsonResponse({'valid': True})
-        
-        # Form submission
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = authenticate(request, email=email, password=password)
-        
+
         if user is not None:
             login(request, user)
-            
-            # Check if profile is complete
+
+            redirect_url = reverse('learningapp:home')
             if hasattr(user, 'profile'):
                 profile = user.profile
-                if (profile.full_name and profile.phone_number and 
-                    profile.about and profile.learning_level):
-                    messages.success(request, 'Login successful!')
-                    return redirect('learningapp:home')
-            
-            messages.info(request, 'Please complete your profile')
-            return redirect('usersapp:profile')
+                if not (profile.full_name and profile.phone_number and profile.about and profile.learning_level):
+                    redirect_url = reverse('usersapp:profile')
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'redirect_url': redirect_url})
+            else:
+                return redirect(redirect_url)
+
         else:
-            messages.error(request, 'Invalid email or password')
-            return redirect('usersapp:login')
-    
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'error': 'Invalid email or password'}, status=400)
+            else:
+                messages.error(request, 'Invalid email or password')
+                return redirect('usersapp:login')
+
     return render(request, 'users/sign_in.html')
 
 @login_required
