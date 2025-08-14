@@ -3,7 +3,9 @@
 <section class="take-quiz">
     <div class="container">
         <h1>{{ quiz.title }}</h1>
-        <p class="meta">Time Limit: {{ quiz.time_limit }} minutes | Max Attempts: {{ quiz.max_attempts }}</p>
+        <p class="meta">
+            Time Limit: <span id="quiz-timer"></span> | Max Attempts: {{ quiz.max_attempts }}
+        </p>
 
         <form method="POST" class="quiz-submit-form">
             {% csrf_token %}
@@ -32,6 +34,33 @@
     </div>
 </section>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let timeLeft = {{ quiz.time_limit }} * 60; // Convert minutes to seconds
+        const timerDisplay = document.getElementById("quiz-timer");
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                autoSubmitQuiz();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function autoSubmitQuiz() {
+            alert("⏰ Time is up! Your quiz will be submitted automatically.");
+            document.querySelector(".quiz-submit-form").submit(); // triggers your submit handler
+        }
+
+        updateTimer(); // initial display
+        const timerInterval = setInterval(updateTimer, 1000);
+    });
+</script>
 <script>
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
