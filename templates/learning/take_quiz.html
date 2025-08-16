@@ -4,7 +4,8 @@
     <div class="container">
         <h1>{{ quiz.title }}</h1>
         <p class="meta">
-            Time Limit: <span id="quiz-timer"></span> | Max Attempts: {{ quiz.max_attempts }}
+            Time Limit: <span id="quiz-timer" data-minutes="{{ quiz.time_limit|default_if_none:0 }}"></span>
+            | Max Attempts: {{ quiz.max_attempts }}
         </p>
 
         <form method="POST" class="quiz-submit-form">
@@ -36,31 +37,40 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        let timeLeft = {{ quiz.time_limit }} * 60; // Convert minutes to seconds
-        const timerDisplay = document.getElementById("quiz-timer");
+        const timerEl = document.getElementById("quiz-timer");
+        const minutes = Number(timerEl.dataset.minutes) || 0;
 
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        if (!minutes) {
+            timerEl.textContent = "No limit";
+            return; // no timer if zero/None
+        }
 
+        let timeLeft = Math.floor(minutes * 60);
+
+        function fmt(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}:${String(s).padStart(2, "0")}`;
+        }
+
+        function tick() {
+            timerEl.textContent = fmt(timeLeft);
             if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                autoSubmitQuiz();
-            } else {
-                timeLeft--;
+                clearInterval(timer);
+                timerEl.textContent = "0:00";
+                alert("⏰ Time is up! Submitting your quiz...");
+                // Important: trigger jQuery submit so your AJAX handler runs
+                const $form = $(".quiz-submit-form");
+                if ($form.length) $form.trigger("submit");
+                return;
             }
+            timeLeft -= 1;
         }
 
-        function autoSubmitQuiz() {
-            alert("⏰ Time is up! Your quiz will be submitted automatically.");
-            document.querySelector(".quiz-submit-form").submit(); // triggers your submit handler
-        }
-
-        updateTimer(); // initial display
-        const timerInterval = setInterval(updateTimer, 1000);
+        tick(); // initial
+        const timer = setInterval(tick, 1000);
     });
-</script>
+</script>    
 <script>
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
