@@ -14,6 +14,7 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_ai_recommended = models.BooleanField(default=False)
     price = models.FloatField(default=1799.99)
+    duration = models.IntegerField()
 
     def __str__(self):
         return self.title

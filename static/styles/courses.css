@@ -69,6 +69,21 @@
     text-decoration: underline;
 }
 
+.course-enroll {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #007bff;
+    text-decoration: none;
+    padding: 6px;
+    border: 1px solid #007bff;
+    cursor: pointer;
+}
+
+.course-enroll:hover {
+    padding: 6px 8px;
+}
+
 /* Course Summary */
 .course-summary {
     font-family: 'Roboto', sans-serif;

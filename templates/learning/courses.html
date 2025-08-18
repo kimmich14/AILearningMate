@@ -6,16 +6,207 @@
     <h2 class="page-title">Explore Our Courses</h2>
 
     <div class="courses-grid">
-    {% for course in courses %}
+        {% for course in courses %}
         <div class="course-card">
             <div class="course-image" style="background-image: url('{{ course.course_image.url }}');"></div>
             <div class="course-info">
-                <h4><a href="{% url 'learningapp:course_detail' course.id %}" class="course-title"> {{course.title}} </a></h4>
-                <p class="course-summary">{{course.description}}</p>
-                <h5>KSh {{course.price}}</h5>
+                <h4>
+                    <a href="{% url 'learningapp:course_detail' course.id %}" class="course-title">
+                        {{ course.title }}
+                    </a>
+                </h4>
+                <p class="course-summary">{{ course.description }}</p>
+                <h6>Duration: {{ course.duration }} weeks</h6>
+                <h5>KSh {{ course.price }}</h5>
+                <a class="course-enroll" id="enrollCourse-{{ course.id }}">Enroll Now</a>
             </div>
         </div>
-    {% endfor %}
-    </div>
+    
+        <!-- Unique Modal -->
+        <div id="mpesaModal-{{ course.id }}" class="modal-overlay">
+            <div class="modal-content">
+                <span class="close-modal" id="closeModal-{{ course.id }}">&times;</span>
+                <h2>Complete Payment</h2>
+                <p>You're enrolling for: <strong>{{ course.title }}</strong></p>
+                <p>Course Price: <strong>KES {{ course.price }}</strong></p>
+    
+                <form id="mpesa-payment-form-{{ course.id }}">
+                    <!-- Hidden Course ID -->
+                    <input type="hidden" name="course_id" value="{{ course.id }}">
+    
+                    <label for="phone-{{ course.id }}">MPesa Phone Number</label>
+                    <input type="tel" id="phone-{{ course.id }}" name="phone" placeholder="e.g. 07XXXXXXXX" required />
+    
+                    <button type="submit" class="btn pay-btn">Pay Now</button>
+                </form>
+    
+                <div id="payment-status-{{ course.id }}" style="margin-top: 1rem; color: green;"></div>
+            </div>
+        </div>
+        <style>
+            /* Modal Background */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                z-index: 999;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.6);
+            }
+        
+            /* Modal Box */
+            .modal-content {
+                background-color: #fff;
+                margin: 10% auto;
+                padding: 2rem;
+                width: 90%;
+                max-width: 400px;
+                border-radius: 10px;
+                position: relative;
+                animation: fadeIn 0.3s ease-in-out;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            }
+        
+            /* Close Button */
+            .close-modal {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                font-size: 24px;
+                font-weight: bold;
+                color: #888;
+                cursor: pointer;
+            }
+        
+            .close-modal:hover {
+                color: #000;
+            }
+        
+            /* Form Elements */
+            #mpesa-payment-form label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+            }
+        
+            #mpesa-payment-form input {
+                width: 100%;
+                padding: 0.6rem;
+                margin-bottom: 1rem;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+            }
+        
+            /* Buttons */
+            .btn.pay-btn {
+                width: 100%;
+                padding: 0.7rem;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+        
+            .btn.pay-btn:hover {
+                background-color: #218838;
+            }
+        
+            /* Animation */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.9);
+                }
+        
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+        </style>
+        {% endfor %}
+    </div>    
 </section>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Open modal
+        document.querySelectorAll(".course-enroll").forEach(button => {
+            button.addEventListener("click", function () {
+                const courseId = this.id.split("-")[1];
+                document.getElementById(`mpesaModal-${courseId}`).style.display = "block";
+            });
+        });
+
+        // Close modal
+        document.querySelectorAll(".close-modal").forEach(button => {
+            button.addEventListener("click", function () {
+                const courseId = this.id.split("-")[1];
+                document.getElementById(`mpesaModal-${courseId}`).style.display = "none";
+            });
+        });
+
+        // Close on outside click
+        window.addEventListener("click", function (event) {
+            document.querySelectorAll(".modal-overlay").forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Attach submit handler to ALL forms
+        $("[id^='mpesa-payment-form-']").on("submit", function (e) {
+            e.preventDefault();
+
+            const courseId = this.id.split("-").pop();  // Extract courseId from form ID
+            const phone = $(`#phone-${courseId}`).val();
+
+            $.ajax({
+                url: "{% url 'learningapp:process_payment' %}",
+                method: "POST",
+                data: {
+                    phone: phone,
+                    course_id: courseId,
+                },
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $(`#payment-status-${courseId}`).text("📲 Prompt sent. Waiting for confirmation...");
+
+                        // Poll payment status every 3 seconds
+                        const intervalId = setInterval(function () {
+                            $.get(`/payment/status/${response.payment_id}/`, function (resp) {
+                                if (resp.status === "success") {
+                                    clearInterval(intervalId);
+                                    alert("✅ Payment successful! Enrolled in course.");
+                                    location.reload();
+                                } else if (resp.status === "failed") {
+                                    clearInterval(intervalId);
+                                    alert("❌ Payment failed. Please try again.");
+                                }
+                            });
+                        }, 3000);
+                    } else {
+                        alert("❌ Could not initiate payment.");
+                    }
+                },
+                error: function (xhr) {
+                    $(`#payment-status-${courseId}`).html("❌ Error: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+    
 {% endblock %}
