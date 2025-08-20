@@ -58,47 +58,48 @@ def signup(request):
     
     return render(request, 'users/sign_up.html')
 
-@csrf_exempt
+@login_required
 def profile(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please log in to access your profile')
         return redirect('usersapp:login')
 
     if request.method == 'POST':
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            # AJAX validation could go here if needed
-            return JsonResponse({'valid': True})
-        
-        # Form submission
         try:
             profile, created = Profile.objects.get_or_create(user=request.user)
             profile.full_name = request.POST.get('full_name', '')
             profile.phone_number = request.POST.get('phone_number', '')
             profile.about = request.POST.get('about', '')
             profile.learning_level = request.POST.get('learning_level', '')
-            
+
             if 'user_image' in request.FILES:
                 profile.user_image = request.FILES['user_image']
-            
+
             profile.save()
-            
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'valid': True, 'redirect': str(reverse('learningapp:home'))})
+
             messages.success(request, 'Profile updated successfully!')
-            return redirect('learningapp:home')  # Redirect to homepage
+            return redirect('learningapp:home')
+
         except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'valid': False, 'error': str(e)})
             messages.error(request, f'Error updating profile: {str(e)}')
             return redirect('usersapp:profile')
-    
+
     # GET request - show form
     try:
         user_profile = Profile.objects.get(user=request.user)
     except Profile.DoesNotExist:
         user_profile = None
-    
+
     context = {
         'profile': user_profile,
         'learning_levels': ['Beginner', 'Intermediate', 'Advanced', 'Expert']
     }
-    return render(request, 'users/profile.html', context=context)
+    return render(request, 'users/profile.html', context)
 
 @csrf_exempt
 def user_login(request):

@@ -96,17 +96,21 @@
                 body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-                .then(response => response.json())
+                .then(response => {
+                    console.log("Raw response status:", response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log("Response data:", data);
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Error during fetch:', error);
                 });
         });
     });
