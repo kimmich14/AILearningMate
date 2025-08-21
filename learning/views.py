@@ -29,10 +29,64 @@ def home(request):
 
 def courses(request):
     courses = Course.objects.all()
+    user_enrollments = Enrollment.objects.filter(user=request.user)
+    
+    # Map course_id -> enrollment
+    enrolled_map = {enrollment.course_id: enrollment for enrollment in user_enrollments}
+    
+    # Attach enrollment to each course
+    for course in courses:
+        course.enrollment = enrolled_map.get(course.id, None)
+
     context = {
         'courses': courses,
     }
     return render(request, 'learning/courses.html', context=context)
+
+@login_required
+def my_courses(request):
+    enrollments = Enrollment.objects.filter(user=request.user)
+    context = {
+        'enrollments': enrollments,
+    }
+    return render(request, 'learning/my-courses.html', context=context)
+
+@login_required
+def track_progress(request):
+    if request.method == "POST":
+        try:
+            time_spent = int(request.POST.get("time_spent", 0))  # in seconds
+            course_id = request.POST.get("course_id")
+
+            enrollment = Enrollment.objects.filter(
+                user=request.user, course_id=course_id
+            ).first()
+
+            if not enrollment:
+                return JsonResponse({"error": "No enrollment found"}, status=404)
+
+            course = enrollment.course
+
+            expected_total_seconds = course.duration * (10 * 3600)
+
+            current_spent = (enrollment.progress / 100.0) * expected_total_seconds
+
+            new_spent = current_spent + time_spent
+
+            new_progress = min((new_spent / expected_total_seconds) * 100, 100.0)
+
+            enrollment.progress = new_progress
+            enrollment.save()
+
+            return JsonResponse({
+                "success": True,
+                "new_progress": round(new_progress, 2)
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 @login_required
 def course_detail(request, course_id):

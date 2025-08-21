@@ -671,5 +671,40 @@
             });
         });
     });
-</script>    
+</script>
+
+<script>
+    let startTime, totalTime = 0;
+    const courseId = "{{ course.id }}";
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible") {
+            startTime = Date.now();
+        } else {
+            if (startTime) {
+                totalTime += (Date.now() - startTime);
+                startTime = null;
+            }
+        }
+    });
+
+    window.addEventListener("beforeunload", function () {
+        if (document.visibilityState === "visible" && startTime) {
+            totalTime += (Date.now() - startTime);
+        }
+
+        let timeSpentSeconds = Math.round(totalTime / 1000);
+
+        $.ajax({
+            url: "{% url 'learningapp:track_progress' %}",
+            method: "POST",
+            async: false,
+            data: {
+                'time_spent': timeSpentSeconds,
+                'course_id': courseId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }
+        });
+    });
+</script>
 {% endblock %}

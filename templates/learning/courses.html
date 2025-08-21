@@ -3,7 +3,14 @@
 {% block content %}
 <!-- Courses Section -->
 <section class="courses">
-    <h2 class="page-title">Explore Our Courses</h2>
+    {% if user.is_authenticated and user.learner %}
+    <div class="courses-header">
+        <h2 class="page-title">Explore Our Courses</h2>
+        <a class="my-courses" href="{% url 'learningapp:my_courses' %}">My Courses</a>
+    </div>
+    {% else %}
+        <h2 class="page-title">Explore Our Courses</h2>
+    {% endif %}
 
     <div class="courses-grid">
         {% for course in courses %}
@@ -17,8 +24,26 @@
                 </h4>
                 <p class="course-summary">{{ course.description }}</p>
                 <h6>Duration: {{ course.duration }} weeks</h6>
+                {% if course.enrollment %}
+                <span class="badge-enrolled">Enrolled</span>
+                <style>
+                    .badge-enrolled {
+                        background-color: #28a745;
+                        /* Bootstrap green */
+                        color: #fff;
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        padding: 0.4em 0.8em;
+                        border-radius: 50px;
+                        /* pill shape */
+                        display: inline-block;
+                    }
+                </style>
+                <p>Progress: {{ course.enrollment.progress }}%</p>
+                {% else %}
                 <h5>KSh {{ course.price }}</h5>
                 <a class="course-enroll" id="enrollCourse-{{ course.id }}">Enroll Now</a>
+                {% endif %}
             </div>
         </div>
     

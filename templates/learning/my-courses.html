@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- Courses Section -->
+<section class="courses">
+    <h2 class="page-title">My Courses</h2>
+
+    <div class="courses-grid">
+        {% for enrollment in enrollments %}
+        <div class="course-card">
+            <div class="course-image" style="background-image: url('{{ enrollment.course.course_image.url }}');"></div>
+            <div class="course-info">
+                <h4>
+                    <a href="{% url 'learningapp:course_detail' enrollment.course.id %}" class="course-title">
+                        {{ enrollment.course.title }}
+                    </a>
+                </h4>
+                <p class="course-summary">{{ enrollment.course.description }}</p>
+                <h6>Duration: {{ enrollment.course.duration }} weeks</h6>
+                <p>Progress: {{ enrollment.progress }} %</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% endblock %}
